@@ -72,7 +72,7 @@
 
         .cell {
             aspect-ratio: 1; background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px; display: flex; justify-content: center; align-items: center;
+            border-radius: 10px; display: flex; justify(content): center; align-items: center;
             font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease;
         }
 
@@ -157,8 +157,8 @@
 
         /* --- TICKS (Read Receipts) --- */
         .tick-container { position: absolute; bottom: 4px; right: 8px; font-size: 0.75rem; }
-        .tick-seen { color: #004dff; } /* Blue for read */
-        .tick-sent { color: #666; } /* Gray for sent */
+        .tick-seen { color: #004dff; }
+        .tick-sent { color: #666; }
 
         .chat-input-area { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
         #chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 8px; color: white; outline: none; }
@@ -228,8 +228,8 @@
                     <ul>
                         <li><strong>Step 1:</strong> Host creates a game and shares the ID.</li>
                         <li><strong>Step 2:</strong> Friend joins using that Room ID.</li>
-                        <li><strong>Chat:</strong> Use the bubble icon to talk. Blue ticks mean they are viewing the chat.</li>
-                        <li><strong>Notification:</strong> You'll get an alert if you receive a message while the chat is closed.</li>
+                        <li><strong>Chat:</strong> Double blue ticks mean they've seen your message.</li>
+                        <li><strong>Status:</strong> If your opponent leaves, the game status will update immediately.</li>
                     </ul>
                 </div>
             </div>
@@ -312,24 +312,28 @@
 
         function setupGame(id, symbol, pId) {
             gameId = id; playerSymbol = symbol; playerId = pId;
-            database.ref('games/' + id).on('value', handleUpdate);
+            const gameRef = database.ref('games/' + id);
+
+            gameRef.on('value', handleUpdate);
             
-            // Sync opponent's read status
+            // Disconnect Handling
+            if (symbol === 'X') {
+                gameRef.onDisconnect().remove(); // Host leaves: Delete game
+            } else {
+                gameRef.child('playerO').onDisconnect().set(null); // Joiner leaves: Nullify O
+                gameRef.child('status').onDisconnect().set('waiting');
+            }
+
             const oppField = symbol === 'X' ? 'lastReadO' : 'lastReadX';
-            database.ref('games/' + id + '/' + oppField).on('value', (s) => {
+            gameRef.child(oppField).on('value', (s) => {
                 opponentLastRead = s.val() || 0;
                 renderChat(); 
             });
 
-            // Listen for new messages
             database.ref('chats/' + id).on('value', (snap) => {
                 const messages = snap.val() || {};
                 renderChat(messages);
-                
-                // If I have the chat open, immediately update my read timestamp
-                if (isChatOpen) {
-                    updateMyReadStatus();
-                }
+                if (isChatOpen) updateMyReadStatus();
             });
             
             roomIdStatus.style.display = 'flex';
@@ -340,23 +344,46 @@
 
         function handleUpdate(snap) {
             const data = snap.val();
-            if (!data) { location.reload(); return; }
+            if (!data) { 
+                if (gameId) {
+                    alert('Host has left. Game ended.');
+                    location.reload();
+                }
+                return; 
+            }
+
             const cells = document.querySelectorAll('.cell');
             data.board.forEach((val, i) => {
                 cells[i].textContent = val;
                 cells[i].className = 'cell ' + (val ? val.toLowerCase() : '');
             });
+
             playerXName.textContent = data.playerX === playerId ? 'You' : 'Opponent';
             playerOName.textContent = data.playerO ? (data.playerO === playerId ? 'You' : 'Opponent') : 'Waiting...';
+
             isMyTurn = data.status === 'playing' && data.currentPlayer === playerSymbol;
-            statusText.textContent = data.status === 'waiting' ? 'Waiting for opponent...' : (data.status === 'finished' ? 'Game Over' : (isMyTurn ? 'Your Turn' : "Opponent's Turn"));
+
+            // STATUS FIX LOGIC
+            if (playerSymbol === 'X' && !data.playerO && data.playerX) {
+                statusText.textContent = "Opponent is left!";
+                statusText.style.color = "#ff4b2b";
+            } else if (data.status === 'waiting') {
+                statusText.textContent = 'Waiting for opponent...';
+                statusText.style.color = "#fff";
+            } else if (data.status === 'finished') {
+                statusText.textContent = 'Game Over';
+                statusText.style.color = "#00dbde";
+            } else {
+                statusText.textContent = isMyTurn ? 'Your Turn' : "Opponent's Turn";
+                statusText.style.color = isMyTurn ? "#00dbde" : "#fff";
+            }
         }
 
         async function handleMove(i) {
             if (!isMyTurn) return;
             const snap = await database.ref('games/' + gameId).once('value');
             const data = snap.val();
-            if (data.board[i] !== '') return;
+            if (!data || data.board[i] !== '') return;
             const newBoard = [...data.board];
             newBoard[i] = playerSymbol;
             const winner = checkWinner(newBoard);
@@ -391,7 +418,6 @@
                 if (isOwn) {
                     const tickSpan = document.createElement('span');
                     tickSpan.className = 'tick-container';
-                    // FIXED SEEN LOGIC: message is seen only if opponent's last read >= message timestamp
                     const isSeen = opponentLastRead >= msg.timestamp;
                     tickSpan.innerHTML = isSeen ? '<i class="fas fa-check-double tick-seen"></i>' : '<i class="fas fa-check tick-sent"></i>';
                     div.appendChild(tickSpan);
@@ -400,7 +426,6 @@
             });
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Handle unread/notifications
             const lastMsg = msgList[msgList.length - 1];
             if (lastMsg && !isChatOpen && lastMsg.sender !== playerSymbol && lastMsg.timestamp > (Date.now() - 2000)) {
                 unreadCount++;
@@ -445,7 +470,17 @@
         chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
         createGameBtn.onclick = createGame;
         joinGameBtn.onclick = joinGame;
-        leaveGameBtn.onclick = () => location.reload();
+        
+        leaveGameBtn.onclick = async () => {
+            if (gameId) {
+                if (playerSymbol === 'X') {
+                    await database.ref('games/' + gameId).remove();
+                } else {
+                    await database.ref('games/' + gameId).update({ playerO: null, status: 'waiting' });
+                }
+            }
+            location.reload();
+        };
         
         resetGameBtn.onclick = async () => {
             if (playerSymbol !== 'X') return alert('Admin Only');

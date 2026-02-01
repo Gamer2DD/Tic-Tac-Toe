@@ -140,10 +140,10 @@
         .chat-header {
             padding: 15px; background: rgba(255,255,255,0.05);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; gap: 10px;
+            display: flex; align-items: center; justify-content: space-between;
         }
 
-        #chat-back-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        #chat-close-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 5px; }
 
         .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
@@ -152,13 +152,13 @@
             font-size: 0.9rem; position: relative; word-wrap: break-word;
         }
 
-        .msg-own { align-self: flex-end; background: #00dbde; color: #1a1a2e; border-bottom-right-radius: 2px; padding-right: 30px; }
+        .msg-own { align-self: flex-end; background: #00dbde; color: #1a1a2e; border-bottom-right-radius: 2px; padding-right: 35px; }
         .msg-opponent { align-self: flex-start; background: rgba(255,255,255,0.1); color: white; border-bottom-left-radius: 2px; }
 
         /* --- TICKS (Read Receipts) --- */
-        .tick-container { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem; }
+        .tick-container { position: absolute; bottom: 4px; right: 8px; font-size: 0.75rem; }
         .tick-seen { color: #004dff; } /* Blue for read */
-        .tick-sent { color: #555; } /* Gray for sent */
+        .tick-sent { color: #666; } /* Gray for sent */
 
         .chat-input-area { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
         #chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 8px; color: white; outline: none; }
@@ -226,10 +226,10 @@
                 <div class="instructions">
                     <h3><i class="fas fa-info-circle"></i> How to Play</h3>
                     <ul>
-                        <li><strong>Host:</strong> Click "Create Game" and share the ID.</li>
-                        <li><strong>Friend:</strong> Click "Join Game" and enter that ID.</li>
-                        <li><strong>Chat:</strong> Open the bubble to chat. Double ticks mean they've seen your text.</li>
-                        <li><strong>Rules:</strong> Get 3 in a row to win!</li>
+                        <li><strong>Step 1:</strong> Host creates a game and shares the ID.</li>
+                        <li><strong>Step 2:</strong> Friend joins using that Room ID.</li>
+                        <li><strong>Chat:</strong> Use the bubble icon to talk. Blue ticks mean they are viewing the chat.</li>
+                        <li><strong>Notification:</strong> You'll get an alert if you receive a message while the chat is closed.</li>
                     </ul>
                 </div>
             </div>
@@ -244,8 +244,8 @@
 
     <div id="chat-window">
         <div class="chat-header">
-            <button id="chat-back-btn"><i class="fas fa-arrow-left"></i></button>
             <span style="font-weight: bold;"><i class="fas fa-comments"></i> Room Chat</span>
+            <button id="chat-close-btn"><i class="fas fa-times"></i></button>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
@@ -314,14 +314,23 @@
             gameId = id; playerSymbol = symbol; playerId = pId;
             database.ref('games/' + id).on('value', handleUpdate);
             
-            // Listen for opponent's read status
+            // Sync opponent's read status
             const oppField = symbol === 'X' ? 'lastReadO' : 'lastReadX';
             database.ref('games/' + id + '/' + oppField).on('value', (s) => {
                 opponentLastRead = s.val() || 0;
-                renderChat(); // Refresh ticks
+                renderChat(); 
             });
 
-            database.ref('chats/' + id).on('value', renderChat);
+            // Listen for new messages
+            database.ref('chats/' + id).on('value', (snap) => {
+                const messages = snap.val() || {};
+                renderChat(messages);
+                
+                // If I have the chat open, immediately update my read timestamp
+                if (isChatOpen) {
+                    updateMyReadStatus();
+                }
+            });
             
             roomIdStatus.style.display = 'flex';
             roomIdDisplay.textContent = id;
@@ -363,13 +372,17 @@
             return null;
         }
 
-        async function renderChat() {
+        async function renderChat(messages = null) {
             if (!gameId) return;
-            const snap = await database.ref('chats/' + gameId).once('value');
-            const messages = snap.val() || {};
-            chatMessages.innerHTML = '';
+            if (!messages) {
+                const snap = await database.ref('chats/' + gameId).once('value');
+                messages = snap.val() || {};
+            }
             
-            Object.values(messages).forEach(msg => {
+            chatMessages.innerHTML = '';
+            const msgList = Object.values(messages);
+            
+            msgList.forEach(msg => {
                 const div = document.createElement('div');
                 const isOwn = msg.sender === playerSymbol;
                 div.classList.add('message', isOwn ? 'msg-own' : 'msg-opponent');
@@ -378,7 +391,7 @@
                 if (isOwn) {
                     const tickSpan = document.createElement('span');
                     tickSpan.className = 'tick-container';
-                    // If opponent's last read time is greater than this message's timestamp
+                    // FIXED SEEN LOGIC: message is seen only if opponent's last read >= message timestamp
                     const isSeen = opponentLastRead >= msg.timestamp;
                     tickSpan.innerHTML = isSeen ? '<i class="fas fa-check-double tick-seen"></i>' : '<i class="fas fa-check tick-sent"></i>';
                     div.appendChild(tickSpan);
@@ -388,8 +401,8 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             // Handle unread/notifications
-            const lastMsg = Object.values(messages).pop();
-            if (lastMsg && !isChatOpen && lastMsg.sender !== playerSymbol && lastMsg.timestamp > Date.now() - 2000) {
+            const lastMsg = msgList[msgList.length - 1];
+            if (lastMsg && !isChatOpen && lastMsg.sender !== playerSymbol && lastMsg.timestamp > (Date.now() - 2000)) {
                 unreadCount++;
                 chatBadge.textContent = unreadCount;
                 chatBadge.style.display = 'flex';
@@ -398,30 +411,42 @@
             }
         }
 
+        function updateMyReadStatus() {
+            if (!gameId) return;
+            const field = playerSymbol === 'X' ? 'lastReadX' : 'lastReadO';
+            database.ref('games/' + gameId).update({ [field]: Date.now() });
+        }
+
         function sendMessage() {
             const text = chatInput.value.trim();
             if (!text || !gameId) return;
-            database.ref('chats/' + gameId).push({ sender: playerSymbol, text: text, timestamp: Date.now() });
+            database.ref('chats/' + gameId).push({ 
+                sender: playerSymbol, 
+                text: text, 
+                timestamp: Date.now() 
+            });
             chatInput.value = '';
         }
 
-        async function openChat() {
+        chatToggleBtn.onclick = () => {
             isChatOpen = true;
             chatWindow.style.display = 'flex';
             unreadCount = 0;
             chatBadge.style.display = 'none';
-            // Update my last read timestamp
-            const field = playerSymbol === 'X' ? 'lastReadX' : 'lastReadO';
-            await database.ref('games/' + gameId).update({ [field]: Date.now() });
-        }
+            updateMyReadStatus();
+        };
 
-        chatToggleBtn.onclick = openChat;
-        document.getElementById('chat-back-btn').onclick = () => { isChatOpen = false; chatWindow.style.display = 'none'; };
+        document.getElementById('chat-close-btn').onclick = () => { 
+            isChatOpen = false; 
+            chatWindow.style.display = 'none'; 
+        };
+
         document.getElementById('chat-send-btn').onclick = sendMessage;
         chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
         createGameBtn.onclick = createGame;
         joinGameBtn.onclick = joinGame;
         leaveGameBtn.onclick = () => location.reload();
+        
         resetGameBtn.onclick = async () => {
             if (playerSymbol !== 'X') return alert('Admin Only');
             await database.ref('games/' + gameId).update({ board: Array(9).fill(''), status: 'playing', currentPlayer: 'X' });

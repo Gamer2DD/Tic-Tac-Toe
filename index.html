@@ -88,12 +88,25 @@
 
         /* --- CHAT LOGO & BADGE --- */
         #chat-trigger {
-            position: fixed; bottom: 30px; right: 30px;
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px;
             width: 60px; height: 60px; border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none; color: white; font-size: 1.4rem; cursor: pointer;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4); z-index: 999; display: none;
+            align-items: center; justify-content: center;
         }
+        
+        /* FIX: Chat icon white portion position set in middle */
+        #chat-trigger i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        
         .badge {
             position: absolute; top: -5px; right: -5px; background: #ff4757;
             width: 24px; height: 24px; border-radius: 50%; font-size: 0.75rem;
@@ -118,6 +131,13 @@
             #chat-box {
                 top: 50%; left: 50%; transform: translate(-50%, -50%);
                 width: 90%; height: 60vh;
+            }
+            
+            /* Center chat trigger on mobile */
+            #chat-trigger {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
             }
         }
 
@@ -187,7 +207,7 @@
                 <div class="card" style="margin-top:20px; font-size: 0.85rem; color: var(--text-dim);">
                     <h3 style="color: var(--text-main); margin-bottom: 10px;">Quick Guide</h3>
                     <p>1. Copy Room ID and send to a friend.</p>
-                    <p>2. Double ticks turn <span style="color:#2563eb">blue</span> when the chat is opened.</p>
+                    <p>2. Single tick when sent, double ticks turn <span style="color:#2563eb">blue</span> when seen.</p>
                     <p>3. Reset is only available to the Admin (Player X).</p>
                 </div>
             </div>
@@ -216,9 +236,9 @@
         // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyBql4jB-mmcC3iYPQElUMgb1I3CaNLAz3Y",
-            authDomain: "multiplayer-b6c33.app.com",
+            authDomain: "multiplayer-b6c33.firebaseapp.com",
             projectId: "multiplayer-b6c33",
-            storageBucket: "multiplayer-b6c33.storage.app",
+            storageBucket: "multiplayer-b6c33.appspot.com",
             messagingSenderId: "337686220145",
             appId: "1:337686220145:web:a2926205fb61b5b6c7bad0",
             databaseURL: "https://multiplayer-b6c33-default-rtdb.firebaseio.com" 
@@ -234,9 +254,10 @@
 
         const board = document.getElementById('board'), gameMsg = document.getElementById('gameMsg');
         const chatMsgs = document.getElementById('chatMsgs'), chatBadge = document.getElementById('chatBadge');
+        const chatInput = document.getElementById('chatInput');
 
         // --- GAME LOGIC ---
-        function createBoard() {
+        function initBoard() {
             board.innerHTML = '';
             for(let i=0; i<9; i++) {
                 const c = document.createElement('div');
@@ -287,7 +308,7 @@
             document.getElementById('roomIdVal').textContent = id;
             document.getElementById('chat-trigger').style.display = 'flex';
             updateButtons(true);
-            createBoard();
+            initBoard();
 
             // Heartbeat for Seen status
             setInterval(() => {
@@ -360,6 +381,9 @@
         function syncChat(snap) {
             const val = snap.val() || {};
             const keys = Object.keys(val);
+            const currentScrollPos = chatMsgs.scrollTop;
+            const isScrolledToBottom = Math.abs(chatMsgs.scrollHeight - chatMsgs.clientHeight - currentScrollPos) < 10;
+            
             chatMsgs.innerHTML = '';
             
             keys.forEach(k => {
@@ -368,48 +392,84 @@
                 const isSeen = oppLastRead >= m.timestamp;
                 const div = document.createElement('div');
                 div.className = `msg ${isMe ? 'msg-me' : 'msg-them'}`;
+                div.setAttribute('data-id', k);
                 div.setAttribute('data-time', m.timestamp);
-                div.innerHTML = `${m.text} ${isMe ? `<span class="ticks ${isSeen ? 'seen' : ''}"><i class="fas fa-check-double"></i></span>` : ''}`;
+                
+                // FIX: Show single tick when sent, double ticks when seen
+                if (isMe) {
+                    let tickIcon = isSeen ? 'fas fa-check-double' : 'fas fa-check';
+                    let tickClass = isSeen ? 'ticks seen' : 'ticks';
+                    div.innerHTML = `${m.text} <span class="${tickClass}"><i class="${tickIcon}"></i></span>`;
+                } else {
+                    div.innerHTML = m.text;
+                }
+                
                 chatMsgs.appendChild(div);
 
-                // FIX: UNREAD COUNT (Preventing double count using IDs)
+                // UNREAD COUNT Logic
                 if(!isMe && !isChatOpen && !processedMsgIds.has(k) && m.timestamp > lastProcessedTime) {
                     unreadCount++;
                     processedMsgIds.add(k);
                     updateBadge();
                 }
             });
-            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            
+            // Restore scroll position or scroll to bottom if already at bottom
+            if (isScrolledToBottom) {
+                chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            } else {
+                chatMsgs.scrollTop = currentScrollPos;
+            }
         }
 
         function refreshTicks() {
-            const ticks = document.querySelectorAll('.msg-me .ticks');
-            ticks.forEach(t => {
-                const time = t.parentElement.getAttribute('data-time');
-                if(oppLastRead >= time) t.classList.add('seen');
+            const myMessages = document.querySelectorAll('.msg-me');
+            myMessages.forEach(msg => {
+                const time = parseInt(msg.getAttribute('data-time'));
+                const ticksSpan = msg.querySelector('.ticks');
+                const tickIcon = ticksSpan.querySelector('i');
+                
+                if (oppLastRead >= time) {
+                    // Change to double tick and blue color when seen
+                    ticksSpan.classList.add('seen');
+                    tickIcon.className = 'fas fa-check-double';
+                } else {
+                    // Single tick when not seen
+                    ticksSpan.classList.remove('seen');
+                    tickIcon.className = 'fas fa-check';
+                }
             });
         }
 
         function updateBadge() {
             if(unreadCount > 0) {
-                chatBadge.textContent = unreadCount;
+                chatBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
                 chatBadge.style.display = 'flex';
                 const t = document.getElementById('toast');
                 t.style.display = 'block';
                 setTimeout(() => t.style.display = 'none', 3000);
+            } else {
+                chatBadge.style.display = 'none';
             }
         }
 
         function sendMsg() {
-            const input = document.getElementById('chatInput');
+            const input = chatInput;
             const text = input.value.trim();
             if(!text || !gameId) return;
+            
+            // Clear processed IDs for new messages
+            processedMsgIds.clear();
+            
             db.ref('chats/' + gameId).push({
                 sender: playerSymbol,
                 text: text,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             input.value = '';
+            
+            // Focus back to input for continuous typing
+            input.focus();
         }
 
         // --- UI ACTIONS ---
@@ -420,17 +480,35 @@
             document.getElementById('btnReset').style.display = (active && playerSymbol === 'X') ? 'flex' : 'none';
         }
 
+        // FIX: Keyboard typing for chat - Proper event handling
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                sendMsg();
+            }
+        });
+
         document.getElementById('btnCreate').onclick = createGame;
         document.getElementById('btnJoin').onclick = joinGame;
         document.getElementById('btnLeave').onclick = () => location.reload();
         document.getElementById('chatSend').onclick = sendMsg;
-        document.getElementById('chatInput').onkeypress = (e) => e.key === 'Enter' && sendMsg();
-
+        
+        // FIX: Proper chat input focus management
         document.getElementById('chat-trigger').onclick = () => {
-            isChatOpen = true; unreadCount = 0;
+            isChatOpen = true;
+            unreadCount = 0;
+            lastProcessedTime = Date.now();
             chatBadge.style.display = 'none';
             document.getElementById('chat-box').style.display = 'flex';
-            db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
+            
+            // Focus on input when opening chat
+            setTimeout(() => {
+                chatInput.focus();
+            }, 100);
+            
+            if (gameId) {
+                db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
+            }
         };
 
         document.getElementById('chatClose').onclick = () => {
@@ -446,10 +524,16 @@
         db.ref('.info/connected').on('value', snap => {
             const dot = document.getElementById('connDot');
             const txt = document.getElementById('connText');
-            if(snap.val()) { dot.className='dot online'; txt.textContent='Online'; }
-            else { dot.className='dot offline'; txt.textContent='Disconnected'; }
+            if(snap.val()) { 
+                dot.className='dot online'; 
+                txt.textContent='Online'; 
+            } else { 
+                dot.className='dot offline'; 
+                txt.textContent='Disconnected'; 
+            }
         });
 
+        // Initialize the game
         initBoard();
     </script>
 </body>

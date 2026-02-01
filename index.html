@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Tic Tac Toe & Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a5b4cb;
+            margin-bottom: 20px;
+        }
+
+        /* --- ROOM STATUS BAR --- */
+        .room-status-bar {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .room-id-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .room-id-status .id-text {
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .room-id-status .copy-id-btn {
+            background: #00dbde;
+            color: #1a1a2e;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .room-id-status .copy-id-btn:hover { background: #0099ff; color: white; }
+
+        /* --- GAME LAYOUT --- */
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .game-board-section { flex: 1; min-width: 300px; }
+
+        .game-info-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 12px;
+            margin: 0 auto;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cell:hover { background-color: rgba(255, 255, 255, 0.15); transform: translateY(-3px); }
+        .cell.x { color: #00dbde; text-shadow: 0 0 10px rgba(0, 219, 222, 0.5); }
+        .cell.o { color: #fc00ff; text-shadow: 0 0 10px rgba(252, 0, 255, 0.5); }
+
+        .game-status {
+            margin-bottom: 25px; padding: 15px;
+            background: rgba(0, 0, 0, 0.2); border-radius: 10px;
+            text-align: center; font-size: 1.3rem; font-weight: 600;
+            min-height: 70px; display: flex; flex-direction: column; justify-content: center;
+        }
+
+        .current-player { font-size: 1.5rem; color: #00dbde; }
+
+        .player-info { margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(0, 0, 0, 0.2); }
+        .player-info.active { border-left: 5px solid #00dbde; background: rgba(0, 219, 222, 0.1); }
+        .player-symbol { display: inline-block; width: 30px; height: 30px; border-radius: 5px; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; }
+        .player-symbol.x { background-color: #00dbde; color: #1a1a2e; }
+        .player-symbol.o { background-color: #fc00ff; color: #1a1a2e; }
+
+        .game-controls { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
+
+        .btn { padding: 14px 20px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: linear-gradient(90deg, #00dbde, #0099ff); color: white; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .btn-danger { background: linear-gradient(90deg, #ff416c, #ff4b2b); color: white; }
+        .btn-warning { background: linear-gradient(90deg, #ff8c00, #ff4500); color: white; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3); }
+
+        .status-indicator { width: 12px; height: 12px; border-radius: 50%; }
+        .status-indicator.online { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .status-indicator.offline { background-color: #f44336; box-shadow: 0 0 10px #f44336; }
+
+        /* --- CHAT SYSTEM STYLES --- */
+        #chat-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00dbde, #fc00ff);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none; /* Hidden until game starts */
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #chat-toggle-btn:hover { transform: scale(1.1); }
+        
+        .unread-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            background: #ff4b2b;
+            border-radius: 50%;
+            border: 2px solid #1a1a2e;
+            display: none;
+        }
+
+        #chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 320px;
+            height: 450px;
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 999;
+            overflow: hidden;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-header {
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .msg-own {
+            align-self: flex-end;
+            background: #00dbde;
+            color: #1a1a2e;
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-opponent {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-bottom-left-radius: 2px;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        #chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            padding: 8px;
+            color: white;
+            outline: none;
+        }
+
+        #chat-send-btn {
+            background: #fc00ff;
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); display: none;
+            justify-content: center; align-items: center; z-index: 1001;
+        }
+
+        .modal-content {
+            background: #16213e; padding: 30px; border-radius: 15px;
+            max-width: 400px; width: 90%; text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .game-container { flex-direction: column; }
+            #chat-window { width: calc(100% - 40px); right: 20px; left: 20px; bottom: 90px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-gamepad"></i> Multiplayer Tic Tac Toe</h1>
+            <p class="subtitle">Play and chat with friends in real-time</p>
+        </header>
+        
+        <div class="room-status-bar" id="roomStatusBar">
+            <div class="connection-status">
+                <div class="status-indicator" id="connectionStatus"></div>
+                <span id="connectionText">Initializing connection...</span>
+            </div>
+            
+            <div class="room-id-status" id="roomIdStatus" style="display: none;">
+                Room ID: <span class="id-text" id="roomIdDisplay">No active game</span>
+                <button class="copy-id-btn" id="copyGameIdBtn" title="Copy Room ID">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="game-board-section">
+                <div class="game-board" id="gameBoard"></div>
+                
+                <div class="game-status" id="gameStatus">
+                    <span id="statusText">Create a new game or join an existing one</span>
+                    <span class="current-player" id="currentPlayer"></span>
+                </div>
+                
+                <div class="game-controls">
+                    <button class="btn btn-primary" id="createGameBtn"><i class="fas fa-plus-circle"></i> Create New Game</button>
+                    <button class="btn btn-secondary" id="joinGameBtn"><i class="fas fa-sign-in-alt"></i> Join Game</button>
+                    <button class="btn btn-warning" id="leaveGameBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Leave Game</button>
+                    <button class="btn btn-danger" id="resetGameBtn" style="display: none;"><i class="fas fa-redo"></i> Reset Game</button>
+                </div>
+            </div>
+            
+            <div class="game-info-section">
+                <div class="player-info" id="playerXInfo">
+                    <h3><span class="player-symbol x">X</span> Player X</h3>
+                    <p id="playerXName">Waiting...</p>
+                </div>
+                
+                <div class="player-info" id="playerOInfo">
+                    <h3><span class="player-symbol o">O</span> Player O</h3>
+                    <p id="playerOName">Waiting...</p>
+                </div>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> Quick Guide</h3>
+                    <ul>
+                        <li>Create a game and share the <strong>Room ID</strong>.</li>
+                        <li>The <strong>Chat Icon</strong> appears once you are in a room.</li>
+                        <li>Only <strong>Player X</strong> can reset the board.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat UI -->
+    <button id="chat-toggle-btn">
+        <i class="fas fa-comments"></i>
+        <div class="unread-badge" id="chat-badge"></div>
+    </button>
+
+    <div id="chat-window">
+        <div class="chat-header">
+            <span><i class="fas fa-comment-dots"></i> Game Chat</span>
+            <button id="close-chat" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages appear here -->
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+            <button id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="confirmationModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modalTitle">Confirm</h3>
+            <p id="modalMessage" style="margin: 20px 0;"></p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn btn-danger" id="modalConfirmBtn" style="flex:1">Confirm</button>
+                <button class="btn btn-secondary" id="modalCancelBtn" style="flex:1">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- FIREBASE CONFIG ---
+        const databaseConfig = {
+            apiKey: "AIzaSyBql4jB-mmcC3iYPQElUMgb1I3CaNLAz3Y",
+            authDomain: "multiplayer-b6c33.app.com",
+            projectId: "multiplayer-b6c33",
+            storageBucket: "multiplayer-b6c33.storage.app",
+            messagingSenderId: "337686220145",
+            appId: "1:337686220145:web:a2926205fb61b5b6c7bad0",
+            databaseURL: "https://multiplayer-b6c33-default-rtdb.firebaseio.com" 
+        };
+
+        firebase.initializeApp(databaseConfig);
+        const database = firebase.database();
+
+        // --- STATE ---
+        let gameId = null;
+        let playerSymbol = null;
+        let playerId = null;
+        let isMyTurn = false;
+        let isChatOpen = false;
+
+        // --- DOM ELEMENTS ---
+        const gameBoard = document.getElementById('gameBoard');
+        const statusText = document.getElementById('statusText');
+        const currentPlayerDisplay = document.getElementById('currentPlayer');
+        const playerXName = document.getElementById('playerXName');
+        const playerOName = document.getElementById('playerOName');
+        const createGameBtn = document.getElementById('createGameBtn');
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+        const leaveGameBtn = document.getElementById('leaveGameBtn');
+        const roomIdDisplay = document.getElementById('roomIdDisplay');
+        const roomIdStatus = document.getElementById('roomIdStatus');
+        const chatToggleBtn = document.getElementById('chat-toggle-btn');
+        const chatWindow = document.getElementById('chat-window');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
+        const chatBadge = document.getElementById('chat-badge');
+
+        // --- INITIALIZE BOARD ---
+        function initBoard() {
+            gameBoard.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => handleMove(i));
+                gameBoard.appendChild(cell);
+            }
+        }
+
+        // --- GAME LOGIC ---
+        async function createGame() {
+            const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const pId = 'p_' + Math.random().toString(36).substring(2, 5);
+            const data = {
+                board: Array(9).fill(''),
+                currentPlayer: 'X',
+                playerX: pId,
+                playerO: null,
+                status: 'waiting',
+                winner: null
+            };
+            await database.ref('games/' + newId).set(data);
+            setupGame(newId, 'X', pId);
+        }
+
+        async function joinGame() {
+            const targetId = prompt('Enter Room ID:');
+            if (!targetId) return;
+            const snap = await database.ref('games/' + targetId.toUpperCase()).once('value');
+            const data = snap.val();
+            if (!data) return alert('Room not found');
+            if (data.playerO) return alert('Room full');
+
+            const pId = 'p_' + Math.random().toString(36).substring(2, 5);
+            await database.ref('games/' + targetId.toUpperCase()).update({
+                playerO: pId,
+                status: 'playing'
+            });
+            setupGame(targetId.toUpperCase(), 'O', pId);
+        }
+
+        function setupGame(id, symbol, pId) {
+            gameId = id;
+            playerSymbol = symbol;
+            playerId = pId;
+            
+            const gameRef = database.ref('games/' + id);
+            gameRef.on('value', handleUpdate);
+            gameRef.onDisconnect().remove();
+
+            // Clear chat and setup listener
+            chatMessages.innerHTML = '';
+            database.ref('chats/' + id).on('child_added', (snap) => {
+                displayMessage(snap.val());
+            });
+
+            roomIdStatus.style.display = 'flex';
+            roomIdDisplay.textContent = id;
+            chatToggleBtn.style.display = 'flex';
+            updateButtons(true);
+        }
+
+        function handleUpdate(snap) {
+            const data = snap.val();
+            if (!data) {
+                alert('Game ended');
+                location.reload();
+                return;
+            }
+
+            // Update UI
+            const cells = document.querySelectorAll('.cell');
+            data.board.forEach((val, i) => {
+                cells[i].textContent = val;
+                cells[i].className = 'cell ' + (val ? val.toLowerCase() : '');
+            });
+
+            playerXName.textContent = data.playerX === playerId ? 'You' : 'Opponent';
+            playerOName.textContent = data.playerO ? (data.playerO === playerId ? 'You' : 'Opponent') : 'Waiting...';
+
+            isMyTurn = data.status === 'playing' && data.currentPlayer === playerSymbol;
+            
+            if (data.status === 'waiting') {
+                statusText.textContent = 'Waiting for opponent...';
+            } else if (data.status === 'finished') {
+                statusText.textContent = data.winner ? `Player ${data.winner} Wins!` : "It's a Draw!";
+                isMyTurn = false;
+            } else {
+                statusText.textContent = isMyTurn ? 'Your Turn' : "Opponent's Turn";
+            }
+        }
+
+        async function handleMove(i) {
+            if (!isMyTurn) return;
+            const snap = await database.ref('games/' + gameId).once('value');
+            const data = snap.val();
+            if (data.board[i] !== '') return;
+
+            const newBoard = [...data.board];
+            newBoard[i] = playerSymbol;
+            const winner = checkWinner(newBoard);
+            const isDraw = !winner && newBoard.every(c => c !== '');
+
+            await database.ref('games/' + gameId).update({
+                board: newBoard,
+                currentPlayer: playerSymbol === 'X' ? 'O' : 'X',
+                status: (winner || isDraw) ? 'finished' : 'playing',
+                winner: winner || null
+            });
+        }
+
+        function checkWinner(b) {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for (let [x,y,z] of wins) {
+                if (b[x] && b[x] === b[y] && b[x] === b[z]) return b[x];
+            }
+            return null;
+        }
+
+        // --- CHAT LOGIC ---
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || !gameId) return;
+
+            database.ref('chats/' + gameId).push({
+                sender: playerSymbol,
+                text: text,
+                timestamp: Date.now()
+            });
+            chatInput.value = '';
+        }
+
+        function displayMessage(msg) {
+            const div = document.createElement('div');
+            div.classList.add('message');
+            div.classList.add(msg.sender === playerSymbol ? 'msg-own' : 'msg-opponent');
+            div.textContent = msg.text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            if (!isChatOpen && msg.sender !== playerSymbol) {
+                chatBadge.style.display = 'block';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        chatToggleBtn.onclick = () => {
+            isChatOpen = !isChatOpen;
+            chatWindow.style.display = isChatOpen ? 'flex' : 'none';
+            if (isChatOpen) chatBadge.style.display = 'none';
+        };
+
+        document.getElementById('close-chat').onclick = () => {
+            isChatOpen = false;
+            chatWindow.style.display = 'none';
+        };
+
+        chatSendBtn.onclick = sendMessage;
+        chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+        createGameBtn.onclick = createGame;
+        joinGameBtn.onclick = joinGame;
+        resetGameBtn.onclick = async () => {
+            if (playerSymbol !== 'X') return alert('Only Player X can reset');
+            await database.ref('games/' + gameId).update({
+                board: Array(9).fill(''),
+                status: 'playing',
+                currentPlayer: 'X',
+                winner: null
+            });
+        };
+
+        leaveGameBtn.onclick = () => location.reload();
+
+        document.getElementById('copyGameIdBtn').onclick = () => {
+            navigator.clipboard.writeText(gameId);
+            alert('ID Copied!');
+        };
+
+        function updateButtons(inGame) {
+            createGameBtn.style.display = inGame ? 'none' : 'flex';
+            joinGameBtn.style.display = inGame ? 'none' : 'flex';
+            leaveGameBtn.style.display = inGame ? 'flex' : 'none';
+            resetGameBtn.style.display = inGame && playerSymbol === 'X' ? 'flex' : 'none';
+        }
+
+        // Network Status
+        database.ref('.info/connected').on('value', (s) => {
+            const status = document.getElementById('connectionStatus');
+            const text = document.getElementById('connectionText');
+            status.className = 'status-indicator ' + (s.val() ? 'online' : 'offline');
+            text.textContent = s.val() ? 'Connected' : 'Offline';
+        });
+
+        initBoard();
+    </script>
+</body>
+</html>

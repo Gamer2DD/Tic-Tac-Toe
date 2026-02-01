@@ -9,142 +9,71 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
+            color: #fff; min-height: 100vh; display: flex;
+            flex-direction: column; align-items: center; padding: 20px; overflow-x: hidden;
         }
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 800px; width: 100%; margin: 0 auto; padding: 20px; }
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            width: 100%;
-        }
+        header { text-align: center; margin-bottom: 30px; width: 100%; }
 
         h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
+            font-size: 2.8rem; margin-bottom: 10px;
             background: linear-gradient(90deg, #00dbde, #fc00ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            -webkit-background-clip: text; background-clip: text; color: transparent;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        .subtitle {
-            font-size: 1.2rem;
-            color: #a5b4cb;
-            margin-bottom: 20px;
-        }
+        .subtitle { font-size: 1.2rem; color: #a5b4cb; margin-bottom: 20px; }
 
         /* --- ROOM STATUS BAR --- */
         .room-status-bar {
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
+            width: 100%; max-width: 800px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background: rgba(255, 255, 255, 0.08); border-radius: 10px;
         }
         
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .connection-status { display: flex; align-items: center; gap: 10px; }
         
         .room-id-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            background: rgba(0, 0, 0, 0.2);
+            display: flex; align-items: center; gap: 10px;
+            padding: 5px 10px; border-radius: 5px; background: rgba(0, 0, 0, 0.2);
         }
         
-        .room-id-status .id-text {
-            font-family: monospace;
-            font-weight: bold;
+        .room-id-status .id-text { font-family: monospace; font-weight: bold; }
+        
+        .copy-id-btn {
+            background: #00dbde; color: #1a1a2e; border: none;
+            padding: 5px 8px; border-radius: 3px; cursor: pointer;
+            transition: background 0.2s; font-size: 0.8rem;
         }
         
-        .room-id-status .copy-id-btn {
-            background: #00dbde;
-            color: #1a1a2e;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .room-id-status .copy-id-btn:hover { background: #0099ff; color: white; }
+        .copy-id-btn:hover { background: #0099ff; color: white; }
 
         /* --- GAME LAYOUT --- */
-        .game-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            justify-content: center;
-        }
-
+        .game-container { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
         .game-board-section { flex: 1; min-width: 300px; }
-
         .game-info-section {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            flex: 1; min-width: 300px; background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .game-board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-gap: 12px;
-            margin: 0 auto;
-            max-width: 400px;
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 15px;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 12px;
+            margin: 0 auto; max-width: 400px; background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px; border-radius: 15px;
         }
 
         .cell {
-            aspect-ratio: 1;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            aspect-ratio: 1; background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px; display: flex; justify-content: center; align-items: center;
+            font-size: 3.5rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease;
         }
 
         .cell:hover { background-color: rgba(255, 255, 255, 0.15); transform: translateY(-3px); }
@@ -152,13 +81,10 @@
         .cell.o { color: #fc00ff; text-shadow: 0 0 10px rgba(252, 0, 255, 0.5); }
 
         .game-status {
-            margin-bottom: 25px; padding: 15px;
-            background: rgba(0, 0, 0, 0.2); border-radius: 10px;
-            text-align: center; font-size: 1.3rem; font-weight: 600;
+            margin-bottom: 25px; padding: 15px; background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: 600;
             min-height: 70px; display: flex; flex-direction: column; justify-content: center;
         }
-
-        .current-player { font-size: 1.5rem; color: #00dbde; }
 
         .player-info { margin-bottom: 20px; padding: 15px; border-radius: 10px; background: rgba(0, 0, 0, 0.2); }
         .player-info.active { border-left: 5px solid #00dbde; background: rgba(0, 219, 222, 0.1); }
@@ -167,29 +93,21 @@
         .player-symbol.o { background-color: #fc00ff; color: #1a1a2e; }
 
         .game-controls { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
-
         .btn { padding: 14px 20px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-primary { background: linear-gradient(90deg, #00dbde, #0099ff); color: white; }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .btn-danger { background: linear-gradient(90deg, #ff416c, #ff4b2b); color: white; }
         .btn-warning { background: linear-gradient(90deg, #ff8c00, #ff4500); color: white; }
+        .btn-danger { background: linear-gradient(90deg, #ff416c, #ff4b2b); color: white; }
 
         .status-indicator { width: 12px; height: 12px; border-radius: 50%; }
         .status-indicator.online { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
         .status-indicator.offline { background-color: #f44336; box-shadow: 0 0 10px #f44336; }
 
-        /* --- HOW TO PLAY MENU (Restored) --- */
-        .instructions {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
+        /* --- HOW TO PLAY --- */
+        .instructions { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 10px; margin-top: 20px; font-size: 0.95rem; }
         .instructions h3 { margin-bottom: 10px; color: #00dbde; }
         .instructions ul { padding-left: 20px; }
-        .instructions li { margin-bottom: 8px; color: #a5b4cb; }
+        .instructions li { margin-bottom: 8px; color: #a5b4cb; list-style: disc; }
 
         /* --- CHAT SYSTEM --- */
         #chat-toggle-btn {
@@ -203,9 +121,8 @@
 
         .unread-badge {
             position: absolute; top: -5px; right: -5px;
-            min-width: 24px; height: 24px; padding: 2px;
-            background: #ff4b2b; color: white; border-radius: 12px;
-            font-size: 12px; font-weight: bold; border: 2px solid #1a1a2e;
+            min-width: 26px; height: 26px; background: #ff4b2b; color: white;
+            border-radius: 50%; font-size: 13px; font-weight: bold; border: 2px solid #1a1a2e;
             display: none; align-items: center; justify-content: center;
         }
 
@@ -223,79 +140,77 @@
         .chat-header {
             padding: 15px; background: rgba(255,255,255,0.05);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; align-items: center; gap: 10px;
         }
 
-        .chat-messages {
-            flex: 1; padding: 15px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 10px;
-        }
+        #chat-back-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 5px; }
+
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
 
         .message {
             max-width: 80%; padding: 8px 12px; border-radius: 12px;
-            font-size: 0.9rem; line-height: 1.4; word-wrap: break-word;
+            font-size: 0.9rem; position: relative; word-wrap: break-word;
         }
 
-        .msg-own { align-self: flex-end; background: #00dbde; color: #1a1a2e; border-bottom-right-radius: 2px; }
+        .msg-own { align-self: flex-end; background: #00dbde; color: #1a1a2e; border-bottom-right-radius: 2px; padding-right: 30px; }
         .msg-opponent { align-self: flex-start; background: rgba(255,255,255,0.1); color: white; border-bottom-left-radius: 2px; }
+
+        /* --- TICKS (Read Receipts) --- */
+        .tick-container { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem; }
+        .tick-seen { color: #004dff; } /* Blue for read */
+        .tick-sent { color: #555; } /* Gray for sent */
 
         .chat-input-area { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
         #chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 8px; color: white; outline: none; }
         #chat-send-btn { background: #fc00ff; border: none; color: white; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; }
 
-        /* --- INSTANT NOTIFICATION TOAST --- */
+        /* --- NOTIFICATION TOAST --- */
         #notification-toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(90deg, #00dbde, #fc00ff);
-            color: #1a1a2e; padding: 12px 25px; border-radius: 50px;
-            font-weight: bold; font-size: 0.95rem; z-index: 2000;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-            display: none; animation: fadeInDown 0.4s ease-out;
+            position: fixed; top: 30px; right: 30px; background: #f1c40f; color: #1a1a2e;
+            padding: 15px 25px; border-radius: 12px; font-weight: 800; z-index: 2000;
+            display: none; align-items: center; gap: 12px; border-left: 6px solid #1a1a2e;
+            box-shadow: 0 10px 40px rgba(241, 196, 15, 0.4);
+            animation: bounceIn 0.5s ease-out;
         }
 
-        @keyframes fadeInDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: translateX(100%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
 
         @media (max-width: 768px) {
-            .game-container { flex-direction: column; }
             #chat-window { width: calc(100% - 40px); right: 20px; left: 20px; bottom: 100px; }
         }
     </style>
 </head>
 <body>
-    <div id="notification-toast">New Message!</div>
+    <div id="notification-toast"><i class="fas fa-bell"></i><span>New Notification</span></div>
 
     <div class="container">
         <header>
             <h1><i class="fas fa-gamepad"></i> Multiplayer Tic Tac Toe</h1>
-            <p class="subtitle">Real-time play & chat</p>
+            <p class="subtitle">Play and Chat with friends</p>
         </header>
         
         <div class="room-status-bar">
             <div class="connection-status">
                 <div class="status-indicator" id="connectionStatus"></div>
-                <span id="connectionText">Initializing...</span>
+                <span id="connectionText">Connecting...</span>
             </div>
-            
             <div class="room-id-status" id="roomIdStatus" style="display: none;">
                 Room ID: <span class="id-text" id="roomIdDisplay">None</span>
-                <button class="copy-id-btn" id="copyGameIdBtn"><i class="fas fa-copy"></i></button>
+                <button class="copy-id-btn" id="copyGameIdBtn" title="Copy ID"><i class="fas fa-copy"></i></button>
             </div>
         </div>
 
         <div class="game-container">
             <div class="game-board-section">
                 <div class="game-board" id="gameBoard"></div>
-                
                 <div class="game-status" id="gameStatus">
-                    <span id="statusText">Create or join a game to start</span>
-                    <span class="current-player" id="currentPlayer"></span>
+                    <span id="statusText">Start a game</span>
                 </div>
-                
                 <div class="game-controls">
-                    <button class="btn btn-primary" id="createGameBtn"><i class="fas fa-plus-circle"></i> Create New Game</button>
+                    <button class="btn btn-primary" id="createGameBtn"><i class="fas fa-plus-circle"></i> Create Game</button>
                     <button class="btn btn-secondary" id="joinGameBtn"><i class="fas fa-sign-in-alt"></i> Join Game</button>
                     <button class="btn btn-warning" id="leaveGameBtn" style="display: none;"><i class="fas fa-sign-out-alt"></i> Leave Game</button>
-                    <button class="btn btn-danger" id="resetGameBtn" style="display: none;"><i class="fas fa-redo"></i> Reset Game</button>
+                    <button class="btn btn-danger" id="resetGameBtn" style="display: none;"><i class="fas fa-redo"></i> Reset Board</button>
                 </div>
             </div>
             
@@ -304,19 +219,17 @@
                     <h3><span class="player-symbol x">X</span> Player X</h3>
                     <p id="playerXName">Waiting...</p>
                 </div>
-                
                 <div class="player-info" id="playerOInfo">
                     <h3><span class="player-symbol o">O</span> Player O</h3>
                     <p id="playerOName">Waiting...</p>
                 </div>
-                
                 <div class="instructions">
                     <h3><i class="fas fa-info-circle"></i> How to Play</h3>
                     <ul>
-                        <li><strong>Host:</strong> Create a game to get a Room ID.</li>
-                        <li><strong>Joiner:</strong> Enter the ID to play against your friend.</li>
-                        <li><strong>Real-time Chat:</strong> Use the bubble icon at the bottom right.</li>
-                        <li><strong>Reset:</strong> Only Player X can clear the board.</li>
+                        <li><strong>Host:</strong> Click "Create Game" and share the ID.</li>
+                        <li><strong>Friend:</strong> Click "Join Game" and enter that ID.</li>
+                        <li><strong>Chat:</strong> Open the bubble to chat. Double ticks mean they've seen your text.</li>
+                        <li><strong>Rules:</strong> Get 3 in a row to win!</li>
                     </ul>
                 </div>
             </div>
@@ -331,8 +244,8 @@
 
     <div id="chat-window">
         <div class="chat-header">
-            <span><i class="fas fa-comments"></i> Room Chat</span>
-            <button id="close-chat" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <button id="chat-back-btn"><i class="fas fa-arrow-left"></i></button>
+            <span style="font-weight: bold;"><i class="fas fa-comments"></i> Room Chat</span>
         </div>
         <div class="chat-messages" id="chat-messages"></div>
         <div class="chat-input-area">
@@ -342,7 +255,6 @@
     </div>
 
     <script>
-        // --- FIREBASE CONFIG ---
         const databaseConfig = {
             apiKey: "AIzaSyBql4jB-mmcC3iYPQElUMgb1I3CaNLAz3Y",
             authDomain: "multiplayer-b6c33.app.com",
@@ -356,10 +268,9 @@
         firebase.initializeApp(databaseConfig);
         const database = firebase.database();
 
-        // --- STATE ---
         let gameId = null, playerSymbol = null, playerId = null, isMyTurn = false, isChatOpen = false, unreadCount = 0;
+        let opponentLastRead = 0;
 
-        // --- DOM ---
         const gameBoard = document.getElementById('gameBoard'), statusText = document.getElementById('statusText');
         const playerXName = document.getElementById('playerXName'), playerOName = document.getElementById('playerOName');
         const createGameBtn = document.getElementById('createGameBtn'), joinGameBtn = document.getElementById('joinGameBtn');
@@ -383,7 +294,8 @@
             const newId = Math.random().toString(36).substring(2, 8).toUpperCase();
             const pId = 'p_' + Math.random().toString(36).substring(2, 5);
             await database.ref('games/' + newId).set({
-                board: Array(9).fill(''), currentPlayer: 'X', playerX: pId, playerO: null, status: 'waiting', winner: null
+                board: Array(9).fill(''), currentPlayer: 'X', playerX: pId, playerO: null, status: 'waiting', 
+                lastReadX: 0, lastReadO: 0
             });
             setupGame(newId, 'X', pId);
         }
@@ -392,9 +304,7 @@
             const targetId = prompt('Enter Room ID:');
             if (!targetId) return;
             const snap = await database.ref('games/' + targetId.toUpperCase()).once('value');
-            if (!snap.exists()) return alert('Room not found');
-            if (snap.val().playerO) return alert('Room full');
-
+            if (!snap.exists()) return alert('Not found');
             const pId = 'p_' + Math.random().toString(36).substring(2, 5);
             await database.ref('games/' + targetId.toUpperCase()).update({ playerO: pId, status: 'playing' });
             setupGame(targetId.toUpperCase(), 'O', pId);
@@ -403,13 +313,16 @@
         function setupGame(id, symbol, pId) {
             gameId = id; playerSymbol = symbol; playerId = pId;
             database.ref('games/' + id).on('value', handleUpdate);
-            database.ref('games/' + id).onDisconnect().remove();
-
-            chatMessages.innerHTML = '';
-            database.ref('chats/' + id).on('child_added', (snap) => {
-                displayMessage(snap.val());
+            
+            // Listen for opponent's read status
+            const oppField = symbol === 'X' ? 'lastReadO' : 'lastReadX';
+            database.ref('games/' + id + '/' + oppField).on('value', (s) => {
+                opponentLastRead = s.val() || 0;
+                renderChat(); // Refresh ticks
             });
 
+            database.ref('chats/' + id).on('value', renderChat);
+            
             roomIdStatus.style.display = 'flex';
             roomIdDisplay.textContent = id;
             chatToggleBtn.style.display = 'flex';
@@ -427,7 +340,7 @@
             playerXName.textContent = data.playerX === playerId ? 'You' : 'Opponent';
             playerOName.textContent = data.playerO ? (data.playerO === playerId ? 'You' : 'Opponent') : 'Waiting...';
             isMyTurn = data.status === 'playing' && data.currentPlayer === playerSymbol;
-            statusText.textContent = data.status === 'waiting' ? 'Waiting for opponent...' : (data.status === 'finished' ? (data.winner ? `Player ${data.winner} Wins!` : "It's a Draw!") : (isMyTurn ? 'Your Turn' : "Opponent's Turn"));
+            statusText.textContent = data.status === 'waiting' ? 'Waiting for opponent...' : (data.status === 'finished' ? 'Game Over' : (isMyTurn ? 'Your Turn' : "Opponent's Turn"));
         }
 
         async function handleMove(i) {
@@ -438,10 +351,9 @@
             const newBoard = [...data.board];
             newBoard[i] = playerSymbol;
             const winner = checkWinner(newBoard);
-            const isDraw = !winner && newBoard.every(c => c !== '');
             await database.ref('games/' + gameId).update({
                 board: newBoard, currentPlayer: playerSymbol === 'X' ? 'O' : 'X',
-                status: (winner || isDraw) ? 'finished' : 'playing', winner: winner || null
+                status: (winner || newBoard.every(c => c !== '')) ? 'finished' : 'playing'
             });
         }
 
@@ -451,25 +363,39 @@
             return null;
         }
 
-        function displayMessage(msg) {
-            const div = document.createElement('div');
-            div.classList.add('message', msg.sender === playerSymbol ? 'msg-own' : 'msg-opponent');
-            div.textContent = msg.text;
-            chatMessages.appendChild(div);
+        async function renderChat() {
+            if (!gameId) return;
+            const snap = await database.ref('chats/' + gameId).once('value');
+            const messages = snap.val() || {};
+            chatMessages.innerHTML = '';
+            
+            Object.values(messages).forEach(msg => {
+                const div = document.createElement('div');
+                const isOwn = msg.sender === playerSymbol;
+                div.classList.add('message', isOwn ? 'msg-own' : 'msg-opponent');
+                div.textContent = msg.text;
+
+                if (isOwn) {
+                    const tickSpan = document.createElement('span');
+                    tickSpan.className = 'tick-container';
+                    // If opponent's last read time is greater than this message's timestamp
+                    const isSeen = opponentLastRead >= msg.timestamp;
+                    tickSpan.innerHTML = isSeen ? '<i class="fas fa-check-double tick-seen"></i>' : '<i class="fas fa-check tick-sent"></i>';
+                    div.appendChild(tickSpan);
+                }
+                chatMessages.appendChild(div);
+            });
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            if (!isChatOpen && msg.sender !== playerSymbol) {
+            // Handle unread/notifications
+            const lastMsg = Object.values(messages).pop();
+            if (lastMsg && !isChatOpen && lastMsg.sender !== playerSymbol && lastMsg.timestamp > Date.now() - 2000) {
                 unreadCount++;
                 chatBadge.textContent = unreadCount;
                 chatBadge.style.display = 'flex';
-                showNotification(`Opponent: ${msg.text.substring(0, 15)}...`);
+                toast.style.display = 'flex';
+                setTimeout(() => toast.style.display = 'none', 3000);
             }
-        }
-
-        function showNotification(text) {
-            toast.textContent = text;
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
         function sendMessage() {
@@ -479,23 +405,27 @@
             chatInput.value = '';
         }
 
-        chatToggleBtn.onclick = () => {
-            isChatOpen = !isChatOpen;
-            chatWindow.style.display = isChatOpen ? 'flex' : 'none';
-            if (isChatOpen) { unreadCount = 0; chatBadge.style.display = 'none'; }
-        };
+        async function openChat() {
+            isChatOpen = true;
+            chatWindow.style.display = 'flex';
+            unreadCount = 0;
+            chatBadge.style.display = 'none';
+            // Update my last read timestamp
+            const field = playerSymbol === 'X' ? 'lastReadX' : 'lastReadO';
+            await database.ref('games/' + gameId).update({ [field]: Date.now() });
+        }
 
-        document.getElementById('close-chat').onclick = () => { isChatOpen = false; chatWindow.style.display = 'none'; };
+        chatToggleBtn.onclick = openChat;
+        document.getElementById('chat-back-btn').onclick = () => { isChatOpen = false; chatWindow.style.display = 'none'; };
         document.getElementById('chat-send-btn').onclick = sendMessage;
         chatInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
         createGameBtn.onclick = createGame;
         joinGameBtn.onclick = joinGame;
         leaveGameBtn.onclick = () => location.reload();
         resetGameBtn.onclick = async () => {
-            if (playerSymbol !== 'X') return alert('Only Host (X) can reset');
-            await database.ref('games/' + gameId).update({ board: Array(9).fill(''), status: 'playing', currentPlayer: 'X', winner: null });
+            if (playerSymbol !== 'X') return alert('Admin Only');
+            await database.ref('games/' + gameId).update({ board: Array(9).fill(''), status: 'playing', currentPlayer: 'X' });
         };
-        document.getElementById('copyGameIdBtn').onclick = () => { navigator.clipboard.writeText(gameId); alert('ID Copied!'); };
 
         function updateButtons(inGame) {
             createGameBtn.style.display = inGame ? 'none' : 'flex';
@@ -505,9 +435,8 @@
         }
 
         database.ref('.info/connected').on('value', (s) => {
-            const indicator = document.getElementById('connectionStatus');
-            indicator.className = 'status-indicator ' + (s.val() ? 'online' : 'offline');
-            document.getElementById('connectionText').textContent = s.val() ? 'Connected' : 'Offline';
+            document.getElementById('connectionStatus').className = 'status-indicator ' + (s.val() ? 'online' : 'offline');
+            document.getElementById('connectionText').textContent = s.val() ? 'Online' : 'Offline';
         });
 
         initBoard();

@@ -57,7 +57,7 @@
         .board {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
-            max-width: 400px; margin: 0 auto;
+            max-width: 400px; margin: 20px auto;
         }
         .cell {
             aspect-ratio: 1; background: var(--bg-card); border-radius: 10px;
@@ -69,23 +69,21 @@
         .cell.x { color: var(--primary); }
         .cell.o { color: var(--secondary); }
 
-        .game-msg { text-align: center; margin: 20px 0; font-size: 1.1rem; font-weight: 600; min-height: 25px; }
+        .game-msg { text-align: center; margin: 10px 0; font-size: 1.2rem; font-weight: 600; min-height: 30px; }
 
         .controls { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
         .btn-main { background: var(--primary); color: #000; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-danger { background: #ef4444; color: white; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .card { background: var(--bg-card); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .player-row { display: flex; justify-content: space-between; padding: 10px; margin-top: 5px; border-radius: 8px; background: rgba(0,0,0,0.2); transition: 0.3s; }
+        .player-row { display: flex; justify-content: space-between; padding: 10px; margin-top: 5px; border-radius: 8px; background: rgba(0,0,0,0.2); transition: 0.3s; border: 1px solid transparent; }
         .player-row.turn { border: 1px solid var(--primary); background: rgba(0, 219, 222, 0.1); transform: scale(1.02); }
 
-        /* Chat Styling */
+        /* Chat Trigger & Box */
         #chat-trigger {
-            position: fixed; bottom: 30px; right: 30px;
-            width: 60px; height: 60px; border-radius: 50%;
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none; color: white; font-size: 1.4rem; cursor: pointer;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4); z-index: 999; display: none;
@@ -107,7 +105,7 @@
         }
 
         @media (max-width: 600px) {
-            #chat-box { width: 95%; right: 2.5%; bottom: 100px; height: 60vh; }
+            #chat-box { width: 95%; right: 2.5%; bottom: 90px; height: 60vh; }
             #chat-trigger { right: 20px; bottom: 20px; }
         }
 
@@ -132,7 +130,7 @@
 </head>
 <body>
 
-    <div id="toast"><i class="fas fa-comment-alt"></i> New Message Received</div>
+    <div id="toast">New Message Received</div>
 
     <div class="container">
         <header>
@@ -153,20 +151,20 @@
         <div class="main-layout">
             <div class="game-section">
                 <div class="board" id="board"></div>
-                <div class="game-msg" id="gameMsg">Create a room to play</div>
+                <div class="game-msg" id="gameMsg">Create a room to start</div>
                 <div class="controls">
                     <button class="btn btn-main" id="btnCreate"><i class="fas fa-plus"></i> Create New Game</button>
                     <button class="btn btn-outline" id="btnJoin"><i class="fas fa-sign-in-alt"></i> Join via ID</button>
                     <button class="btn btn-danger" id="btnLeave" style="display:none"><i class="fas fa-door-open"></i> Leave Game</button>
-                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> Reset Board (Admin)</button>
+                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> New Round (Random Turn)</button>
                 </div>
             </div>
 
             <div class="info-section">
                 <div class="card">
-                    <h3 style="margin-bottom:15px; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Player Stats</h3>
+                    <h3 style="margin-bottom:15px; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Players</h3>
                     <div id="pXBox" class="player-row">
-                        <span><i class="fas fa-times-circle" style="color:var(--primary)"></i> Player X (Admin)</span>
+                        <span><i class="fas fa-times-circle" style="color:var(--primary)"></i> Player X</span>
                         <small id="pXStatus">Offline</small>
                     </div>
                     <div id="pOBox" class="player-row">
@@ -175,10 +173,10 @@
                     </div>
                 </div>
                 <div class="card" style="margin-top:20px; font-size: 0.85rem; color: var(--text-dim);">
-                    <h3 style="color: var(--text-main); margin-bottom: 10px;">Quick Guide</h3>
-                    <p>• Share Room ID with a friend to play.</p>
-                    <p>• <span style="color:var(--primary)">X</span> always goes first.</p>
-                    <p>• Admin (X) can reset the board anytime.</p>
+                    <h3 style="color: var(--text-main); margin-bottom: 10px;">How to play</h3>
+                    <p>1. Create a room and share the ID.</p>
+                    <p>2. The game randomly chooses who starts first.</p>
+                    <p>3. Blue ticks in chat mean seen.</p>
                 </div>
             </div>
         </div>
@@ -239,7 +237,9 @@
         async function createGame() {
             const id = Math.random().toString(36).substring(2, 8).toUpperCase();
             await db.ref('games/' + id).set({
-                board: Array(9).fill(''), turn: 'X', status: 'waiting',
+                board: Array(9).fill(''), 
+                turn: 'X', // Default, will be randomized when O joins
+                status: 'waiting',
                 pX: true, pO: false, lastReadX: Date.now(), lastReadO: 0
             });
             joinAs(id, 'X');
@@ -250,23 +250,28 @@
             if(!id) return;
             const rid = id.toUpperCase();
             const snap = await db.ref('games/' + rid).once('value');
-            if(!snap.exists()) return alert("Room not found!");
             
+            if(!snap.exists()) return alert("Room not found!");
             const data = snap.val();
             if(data.pO && data.pX) return alert("Room is full!");
 
-            await db.ref('games/' + rid).update({ pO: true, status: 'playing', lastReadO: Date.now() });
+            // RANDOM TURN LOGIC: Decide who starts now that both players are here
+            const randomStarter = Math.random() < 0.5 ? 'X' : 'O';
+
+            await db.ref('games/' + rid).update({ 
+                pO: true, 
+                status: 'playing', 
+                lastReadO: Date.now(),
+                turn: randomStarter 
+            });
             joinAs(rid, 'O');
         }
 
         function joinAs(id, symbol) {
             gameId = id; playerSymbol = symbol;
-            
-            // Presence
             db.ref(`games/${id}/p${symbol}`).onDisconnect().set(false);
             db.ref(`games/${id}/p${symbol}`).set(true);
 
-            // Listeners
             db.ref('games/' + id).on('value', syncGame);
             db.ref('chats/' + id).on('value', syncChat);
             
@@ -283,9 +288,7 @@
             initBoard();
 
             setInterval(() => {
-                if(isChatOpen && gameId) {
-                    db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
-                }
+                if(isChatOpen && gameId) db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
             }, 2000);
         }
 
@@ -316,7 +319,7 @@
             } else if(data.status === 'draw') {
                 gameMsg.textContent = "It's a Draw! 🤝";
                 gameMsg.style.color = "var(--text-dim)";
-            } else if(!isOppOnline && data.pO) {
+            } else if(!isOppOnline && data.status === 'playing') {
                 gameMsg.textContent = "Opponent Disconnected...";
                 gameMsg.style.color = "#ef4444";
             } else if(data.status === 'waiting') {
@@ -329,7 +332,6 @@
 
         async function makeMove(i) {
             if(!isMyTurn || gameStatus !== 'playing') return;
-            
             const snap = await db.ref('games/' + gameId).once('value');
             const b = [...snap.val().board];
             if(b[i]) return;
@@ -353,29 +355,28 @@
 
         async function resetGame() {
             if(playerSymbol !== 'X' || !gameId) return;
+            // Randomize turn again on manual reset
+            const nextStarter = Math.random() < 0.5 ? 'X' : 'O';
             await db.ref('games/' + gameId).update({
                 board: Array(9).fill(''),
-                turn: 'X',
+                turn: nextStarter,
                 status: 'playing',
                 winner: null
             });
         }
 
-        // --- CHAT ---
+        // --- CHAT LOGIC ---
         function syncChat(snap) {
             const val = snap.val() || {};
             const keys = Object.keys(val).sort((a,b) => val[a].timestamp - val[b].timestamp);
-            
             chatMsgs.innerHTML = '';
             keys.forEach(k => {
                 const m = val[k];
                 const isMe = m.sender === playerSymbol;
                 const isSeen = oppLastRead >= m.timestamp;
-                
                 const div = document.createElement('div');
                 div.className = `msg ${isMe ? 'msg-me' : 'msg-them'}`;
                 div.setAttribute('data-time', m.timestamp);
-                
                 let content = m.text;
                 if(isMe) {
                     const tickClass = isSeen ? 'ticks seen' : 'ticks';
@@ -384,11 +385,8 @@
                 }
                 div.innerHTML = content;
                 chatMsgs.appendChild(div);
-
                 if(!isMe && !isChatOpen && !processedMsgIds.has(k) && m.timestamp > lastProcessedTime) {
-                    unreadCount++;
-                    processedMsgIds.add(k);
-                    showToast();
+                    unreadCount++; processedMsgIds.add(k); showToast();
                 }
             });
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
@@ -399,10 +397,7 @@
                 const time = parseInt(msg.getAttribute('data-time'));
                 if (oppLastRead >= time) {
                     const t = msg.querySelector('.ticks');
-                    if(t) {
-                        t.classList.add('seen');
-                        t.querySelector('i').className = 'fas fa-check-double';
-                    }
+                    if(t) { t.classList.add('seen'); t.querySelector('i').className = 'fas fa-check-double'; }
                 }
             });
         }
@@ -410,18 +405,15 @@
         function showToast() {
             chatBadge.textContent = unreadCount;
             chatBadge.style.display = 'flex';
-            const t = document.getElementById('toast');
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
+            document.getElementById('toast').style.display = 'block';
+            setTimeout(() => document.getElementById('toast').style.display = 'none', 3000);
         }
 
         function sendMsg() {
             const text = chatInput.value.trim();
             if(!text || !gameId) return;
             db.ref('chats/' + gameId).push({
-                sender: playerSymbol,
-                text: text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+                sender: playerSymbol, text: text, timestamp: firebase.database.ServerValue.TIMESTAMP
             });
             chatInput.value = '';
         }
@@ -440,24 +432,14 @@
         document.getElementById('btnLeave').onclick = () => location.reload();
         document.getElementById('chatSend').onclick = sendMsg;
         document.getElementById('chatInput').onkeydown = (e) => { if(e.key === 'Enter') sendMsg(); };
-
         document.getElementById('chat-trigger').onclick = () => {
-            isChatOpen = true; unreadCount = 0;
-            chatBadge.style.display = 'none';
+            isChatOpen = true; unreadCount = 0; chatBadge.style.display = 'none';
             document.getElementById('chat-box').style.display = 'flex';
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
             if(gameId) db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
         };
-
-        document.getElementById('chatClose').onclick = () => {
-            isChatOpen = false;
-            document.getElementById('chat-box').style.display = 'none';
-        };
-
-        document.getElementById('copyId').onclick = () => {
-            navigator.clipboard.writeText(gameId);
-            alert("ID Copied: " + gameId);
-        };
+        document.getElementById('chatClose').onclick = () => { isChatOpen = false; document.getElementById('chat-box').style.display = 'none'; };
+        document.getElementById('copyId').onclick = () => { navigator.clipboard.writeText(gameId); alert("ID Copied!"); };
 
         db.ref('.info/connected').on('value', snap => {
             const dot = document.getElementById('connDot'), txt = document.getElementById('connText');

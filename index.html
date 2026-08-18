@@ -35,7 +35,6 @@
         header { text-align: center; margin-bottom: 20px; }
         h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; letter-spacing: 2px; }
 
-        /* --- STATS BAR --- */
         .stats-bar {
             background: var(--bg-card);
             padding: 12px 20px;
@@ -52,11 +51,9 @@
         .offline { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
         .room-info { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; }
 
-        /* --- LAYOUT --- */
         .main-layout { display: grid; grid-template-columns: 1fr 320px; gap: 25px; }
         @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
 
-        /* --- BOARD --- */
         .board {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
@@ -66,6 +63,7 @@
             aspect-ratio: 1; background: var(--bg-card); border-radius: 10px;
             display: flex; justify-content: center; align-items: center;
             font-size: 3.5rem; font-weight: 800; cursor: pointer; transition: 0.2s;
+            height: 100px;
         }
         .cell:hover { background: #334155; transform: translateY(-3px); }
         .cell.x { color: var(--primary); }
@@ -73,38 +71,25 @@
 
         .game-msg { text-align: center; margin: 20px 0; font-size: 1.1rem; font-weight: 600; min-height: 25px; }
 
-        /* --- BUTTONS --- */
-        .controls { display: flex; flex-direction: column; gap: 10px; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .controls { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
+        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; text-decoration: none; }
         .btn-main { background: var(--primary); color: #000; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-danger { background: #ef4444; color: white; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* --- PLAYERS CARD --- */
         .card { background: var(--bg-card); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
-        .player-row { display: flex; justify-content: space-between; padding: 10px; margin-top: 5px; border-radius: 8px; background: rgba(0,0,0,0.2); }
-        .player-row.turn { border: 1px solid var(--primary); background: rgba(0, 219, 222, 0.1); }
+        .player-row { display: flex; justify-content: space-between; padding: 10px; margin-top: 5px; border-radius: 8px; background: rgba(0,0,0,0.2); transition: 0.3s; }
+        .player-row.turn { border: 1px solid var(--primary); background: rgba(0, 219, 222, 0.1); transform: scale(1.02); }
 
-        /* --- CHAT LOGO & BADGE --- */
+        /* Chat Styling */
         #chat-trigger {
-            position: fixed; 
-            bottom: 30px; 
-            right: 30px;
+            position: fixed; bottom: 30px; right: 30px;
             width: 60px; height: 60px; border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none; color: white; font-size: 1.4rem; cursor: pointer;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4); z-index: 999; display: none;
             align-items: center; justify-content: center;
-        }
-        
-        /* FIX: Chat icon white portion position set in middle */
-        #chat-trigger i {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
         }
         
         .badge {
@@ -114,40 +99,26 @@
             border: 2px solid var(--bg-dark); font-weight: bold;
         }
 
-        /* --- CHAT WINDOW (RESPONSIVE POSITIONS) --- */
         #chat-box {
             position: fixed; width: 350px; height: 500px; background: var(--bg-card);
             border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
             display: none; flex-direction: column; z-index: 1000; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            bottom: 100px; right: 30px;
         }
 
-        /* Desktop View */
-        @media (min-width: 901px) {
-            #chat-box { right: 30px; top: 100px; }
-        }
-
-        /* Mobile View (Exactly in Middle) */
-        @media (max-width: 900px) {
-            #chat-box {
-                top: 50%; left: 50%; transform: translate(-50%, -50%);
-                width: 90%; height: 60vh;
-            }
-            
-            /* Center chat trigger on mobile */
-            #chat-trigger {
-                left: 50%;
-                right: auto;
-                transform: translateX(-50%);
-            }
+        @media (max-width: 600px) {
+            #chat-box { width: 95%; right: 2.5%; bottom: 100px; height: 60vh; }
+            #chat-trigger { right: 20px; bottom: 20px; }
         }
 
         .chat-header { padding: 15px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
         .chat-msgs { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .msg { max-width: 80%; padding: 10px 12px; border-radius: 12px; font-size: 0.9rem; position: relative; word-wrap: break-word; }
-        .msg-me { align-self: flex-end; background: var(--primary); color: #000; border-bottom-right-radius: 2px; padding-right: 32px; }
+        .msg-me { align-self: flex-end; background: var(--primary); color: #000; border-bottom-right-radius: 2px; }
         .msg-them { align-self: flex-start; background: #334155; color: #fff; border-bottom-left-radius: 2px; }
-        .ticks { position: absolute; bottom: 4px; right: 8px; font-size: 0.7rem; color: #666; }
-        .ticks.seen { color: #2563eb; }
+        
+        .ticks { font-size: 0.7rem; margin-left: 5px; opacity: 0.6; }
+        .ticks.seen { color: #2563eb; opacity: 1; }
 
         .chat-input { padding: 12px; display: flex; gap: 10px; background: rgba(0,0,0,0.2); }
         .chat-input input { flex: 1; padding: 10px; border-radius: 6px; border: none; background: #0f172a; color: #fff; outline: none; }
@@ -187,7 +158,7 @@
                     <button class="btn btn-main" id="btnCreate"><i class="fas fa-plus"></i> Create New Game</button>
                     <button class="btn btn-outline" id="btnJoin"><i class="fas fa-sign-in-alt"></i> Join via ID</button>
                     <button class="btn btn-danger" id="btnLeave" style="display:none"><i class="fas fa-door-open"></i> Leave Game</button>
-                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> Reset Board</button>
+                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> Reset Board (Admin)</button>
                 </div>
             </div>
 
@@ -195,7 +166,7 @@
                 <div class="card">
                     <h3 style="margin-bottom:15px; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Player Stats</h3>
                     <div id="pXBox" class="player-row">
-                        <span><i class="fas fa-times-circle" style="color:var(--primary)"></i> Player X</span>
+                        <span><i class="fas fa-times-circle" style="color:var(--primary)"></i> Player X (Admin)</span>
                         <small id="pXStatus">Offline</small>
                     </div>
                     <div id="pOBox" class="player-row">
@@ -203,18 +174,16 @@
                         <small id="pOStatus">Offline</small>
                     </div>
                 </div>
-
                 <div class="card" style="margin-top:20px; font-size: 0.85rem; color: var(--text-dim);">
                     <h3 style="color: var(--text-main); margin-bottom: 10px;">Quick Guide</h3>
-                    <p>1. Copy Room ID and send to a friend.</p>
-                    <p>2. Single tick when sent, double ticks turn <span style="color:#2563eb">blue</span> when seen.</p>
-                    <p>3. Reset is only available to the Admin (Player X).</p>
+                    <p>• Share Room ID with a friend to play.</p>
+                    <p>• <span style="color:var(--primary)">X</span> always goes first.</p>
+                    <p>• Admin (X) can reset the board anytime.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Chat Components -->
     <button id="chat-trigger">
         <i class="fas fa-comments"></i>
         <div class="badge" id="chatBadge">0</div>
@@ -233,7 +202,7 @@
     </div>
 
     <script>
-        // --- FIREBASE INITIALIZATION ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyBql4jB-mmcC3iYPQElUMgb1I3CaNLAz3Y",
             authDomain: "multiplayer-b6c33.firebaseapp.com",
@@ -247,23 +216,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- APP STATE ---
+        // --- STATE ---
         let gameId = null, playerSymbol = null, isMyTurn = false, isChatOpen = false;
         let unreadCount = 0, lastProcessedTime = Date.now(), oppLastRead = 0;
         let processedMsgIds = new Set();
+        let gameStatus = 'waiting';
 
-        const board = document.getElementById('board'), gameMsg = document.getElementById('gameMsg');
+        const boardEl = document.getElementById('board'), gameMsg = document.getElementById('gameMsg');
         const chatMsgs = document.getElementById('chatMsgs'), chatBadge = document.getElementById('chatBadge');
         const chatInput = document.getElementById('chatInput');
 
-        // --- GAME LOGIC ---
         function initBoard() {
-            board.innerHTML = '';
+            boardEl.innerHTML = '';
             for(let i=0; i<9; i++) {
                 const c = document.createElement('div');
                 c.className = 'cell';
                 c.onclick = () => makeMove(i);
-                board.appendChild(c);
+                boardEl.appendChild(c);
             }
         }
 
@@ -279,25 +248,28 @@
         async function joinGame() {
             const id = prompt("Enter Room ID:");
             if(!id) return;
-            const snap = await db.ref('games/' + id.toUpperCase()).once('value');
+            const rid = id.toUpperCase();
+            const snap = await db.ref('games/' + rid).once('value');
             if(!snap.exists()) return alert("Room not found!");
-            await db.ref('games/' + id.toUpperCase()).update({ pO: true, status: 'playing', lastReadO: Date.now() });
-            joinAs(id.toUpperCase(), 'O');
+            
+            const data = snap.val();
+            if(data.pO && data.pX) return alert("Room is full!");
+
+            await db.ref('games/' + rid).update({ pO: true, status: 'playing', lastReadO: Date.now() });
+            joinAs(rid, 'O');
         }
 
         function joinAs(id, symbol) {
             gameId = id; playerSymbol = symbol;
             
-            // Presence Logic
-            const pRef = db.ref(`games/${id}/p${symbol}`);
-            pRef.onDisconnect().set(false);
-            pRef.set(true);
+            // Presence
+            db.ref(`games/${id}/p${symbol}`).onDisconnect().set(false);
+            db.ref(`games/${id}/p${symbol}`).set(true);
 
-            // Sync Game & Chat
+            // Listeners
             db.ref('games/' + id).on('value', syncGame);
             db.ref('chats/' + id).on('value', syncChat);
             
-            // Track Opponent's Seen Status
             const oppTag = symbol === 'X' ? 'O' : 'X';
             db.ref(`games/${id}/lastRead${oppTag}`).on('value', snap => {
                 oppLastRead = snap.val() || 0;
@@ -310,18 +282,18 @@
             updateButtons(true);
             initBoard();
 
-            // Heartbeat for Seen status
             setInterval(() => {
                 if(isChatOpen && gameId) {
                     db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
                 }
-            }, 1500);
+            }, 2000);
         }
 
         function syncGame(snap) {
             const data = snap.val();
-            if(!data) { location.reload(); return; }
+            if(!data) return;
 
+            gameStatus = data.status;
             const cells = document.querySelectorAll('.cell');
             data.board.forEach((v, i) => {
                 cells[i].textContent = v;
@@ -331,23 +303,24 @@
             const oppSymbol = playerSymbol === 'X' ? 'O' : 'X';
             const isOppOnline = data['p' + oppSymbol];
             
-            document.getElementById('pXStatus').textContent = data.pX ? 'Online' : 'Left';
-            document.getElementById('pOStatus').textContent = data.pO ? 'Online' : 'Left';
+            document.getElementById('pXStatus').textContent = data.pX ? 'Online' : 'Offline';
+            document.getElementById('pOStatus').textContent = data.pO ? 'Online' : 'Offline';
             document.getElementById('pXBox').classList.toggle('turn', data.turn === 'X');
             document.getElementById('pOBox').classList.toggle('turn', data.turn === 'O');
 
-            isMyTurn = data.turn === playerSymbol && data.status === 'playing' && isOppOnline;
+            isMyTurn = (data.turn === playerSymbol && data.status === 'playing' && isOppOnline);
 
-            if(!isOppOnline && data.status !== 'waiting') {
-                gameMsg.textContent = "Opponent has Left...";
+            if(data.status === 'win') {
+                gameMsg.textContent = `Player ${data.winner} Wins! 🎉`;
+                gameMsg.style.color = "var(--primary)";
+            } else if(data.status === 'draw') {
+                gameMsg.textContent = "It's a Draw! 🤝";
+                gameMsg.style.color = "var(--text-dim)";
+            } else if(!isOppOnline && data.pO) {
+                gameMsg.textContent = "Opponent Disconnected...";
                 gameMsg.style.color = "#ef4444";
             } else if(data.status === 'waiting') {
                 gameMsg.textContent = "Waiting for Opponent...";
-            } else if(data.status === 'win') {
-                gameMsg.textContent = `Player ${data.winner} Wins!`;
-                gameMsg.style.color = "var(--primary)";
-            } else if(data.status === 'draw') {
-                gameMsg.textContent = "It's a Draw!";
             } else {
                 gameMsg.textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
                 gameMsg.style.color = "var(--text-main)";
@@ -355,7 +328,8 @@
         }
 
         async function makeMove(i) {
-            if(!isMyTurn) return;
+            if(!isMyTurn || gameStatus !== 'playing') return;
+            
             const snap = await db.ref('games/' + gameId).once('value');
             const b = [...snap.val().board];
             if(b[i]) return;
@@ -377,102 +351,82 @@
             return wins.some(p => b[p[0]] && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]);
         }
 
-        // --- CHAT LOGIC ---
+        async function resetGame() {
+            if(playerSymbol !== 'X' || !gameId) return;
+            await db.ref('games/' + gameId).update({
+                board: Array(9).fill(''),
+                turn: 'X',
+                status: 'playing',
+                winner: null
+            });
+        }
+
+        // --- CHAT ---
         function syncChat(snap) {
             const val = snap.val() || {};
-            const keys = Object.keys(val);
-            const currentScrollPos = chatMsgs.scrollTop;
-            const isScrolledToBottom = Math.abs(chatMsgs.scrollHeight - chatMsgs.clientHeight - currentScrollPos) < 10;
+            const keys = Object.keys(val).sort((a,b) => val[a].timestamp - val[b].timestamp);
             
             chatMsgs.innerHTML = '';
-            
             keys.forEach(k => {
                 const m = val[k];
                 const isMe = m.sender === playerSymbol;
                 const isSeen = oppLastRead >= m.timestamp;
+                
                 const div = document.createElement('div');
                 div.className = `msg ${isMe ? 'msg-me' : 'msg-them'}`;
-                div.setAttribute('data-id', k);
                 div.setAttribute('data-time', m.timestamp);
                 
-                // FIX: Show single tick when sent, double ticks when seen
-                if (isMe) {
-                    let tickIcon = isSeen ? 'fas fa-check-double' : 'fas fa-check';
-                    let tickClass = isSeen ? 'ticks seen' : 'ticks';
-                    div.innerHTML = `${m.text} <span class="${tickClass}"><i class="${tickIcon}"></i></span>`;
-                } else {
-                    div.innerHTML = m.text;
+                let content = m.text;
+                if(isMe) {
+                    const tickClass = isSeen ? 'ticks seen' : 'ticks';
+                    const icon = isSeen ? 'fa-check-double' : 'fa-check';
+                    content += ` <span class="${tickClass}"><i class="fas ${icon}"></i></span>`;
                 }
-                
+                div.innerHTML = content;
                 chatMsgs.appendChild(div);
 
-                // UNREAD COUNT Logic
                 if(!isMe && !isChatOpen && !processedMsgIds.has(k) && m.timestamp > lastProcessedTime) {
                     unreadCount++;
                     processedMsgIds.add(k);
-                    updateBadge();
+                    showToast();
                 }
             });
-            
-            // Restore scroll position or scroll to bottom if already at bottom
-            if (isScrolledToBottom) {
-                chatMsgs.scrollTop = chatMsgs.scrollHeight;
-            } else {
-                chatMsgs.scrollTop = currentScrollPos;
-            }
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
         }
 
         function refreshTicks() {
-            const myMessages = document.querySelectorAll('.msg-me');
-            myMessages.forEach(msg => {
+            document.querySelectorAll('.msg-me').forEach(msg => {
                 const time = parseInt(msg.getAttribute('data-time'));
-                const ticksSpan = msg.querySelector('.ticks');
-                const tickIcon = ticksSpan.querySelector('i');
-                
                 if (oppLastRead >= time) {
-                    // Change to double tick and blue color when seen
-                    ticksSpan.classList.add('seen');
-                    tickIcon.className = 'fas fa-check-double';
-                } else {
-                    // Single tick when not seen
-                    ticksSpan.classList.remove('seen');
-                    tickIcon.className = 'fas fa-check';
+                    const t = msg.querySelector('.ticks');
+                    if(t) {
+                        t.classList.add('seen');
+                        t.querySelector('i').className = 'fas fa-check-double';
+                    }
                 }
             });
         }
 
-        function updateBadge() {
-            if(unreadCount > 0) {
-                chatBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-                chatBadge.style.display = 'flex';
-                const t = document.getElementById('toast');
-                t.style.display = 'block';
-                setTimeout(() => t.style.display = 'none', 3000);
-            } else {
-                chatBadge.style.display = 'none';
-            }
+        function showToast() {
+            chatBadge.textContent = unreadCount;
+            chatBadge.style.display = 'flex';
+            const t = document.getElementById('toast');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
         function sendMsg() {
-            const input = chatInput;
-            const text = input.value.trim();
+            const text = chatInput.value.trim();
             if(!text || !gameId) return;
-            
-            // Clear processed IDs for new messages
-            processedMsgIds.clear();
-            
             db.ref('chats/' + gameId).push({
                 sender: playerSymbol,
                 text: text,
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
-            input.value = '';
-            
-            // Focus back to input for continuous typing
-            input.focus();
+            chatInput.value = '';
         }
 
-        // --- UI ACTIONS ---
+        // --- UI ---
         function updateButtons(active) {
             document.getElementById('btnCreate').style.display = active ? 'none' : 'flex';
             document.getElementById('btnJoin').style.display = active ? 'none' : 'flex';
@@ -480,35 +434,19 @@
             document.getElementById('btnReset').style.display = (active && playerSymbol === 'X') ? 'flex' : 'none';
         }
 
-        // FIX: Keyboard typing for chat - Proper event handling
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault(); // Prevent form submission
-                sendMsg();
-            }
-        });
-
         document.getElementById('btnCreate').onclick = createGame;
         document.getElementById('btnJoin').onclick = joinGame;
+        document.getElementById('btnReset').onclick = resetGame;
         document.getElementById('btnLeave').onclick = () => location.reload();
         document.getElementById('chatSend').onclick = sendMsg;
-        
-        // FIX: Proper chat input focus management
+        document.getElementById('chatInput').onkeydown = (e) => { if(e.key === 'Enter') sendMsg(); };
+
         document.getElementById('chat-trigger').onclick = () => {
-            isChatOpen = true;
-            unreadCount = 0;
-            lastProcessedTime = Date.now();
+            isChatOpen = true; unreadCount = 0;
             chatBadge.style.display = 'none';
             document.getElementById('chat-box').style.display = 'flex';
-            
-            // Focus on input when opening chat
-            setTimeout(() => {
-                chatInput.focus();
-            }, 100);
-            
-            if (gameId) {
-                db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
-            }
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            if(gameId) db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
         };
 
         document.getElementById('chatClose').onclick = () => {
@@ -518,22 +456,15 @@
 
         document.getElementById('copyId').onclick = () => {
             navigator.clipboard.writeText(gameId);
-            alert("Room ID Copied!");
+            alert("ID Copied: " + gameId);
         };
 
         db.ref('.info/connected').on('value', snap => {
-            const dot = document.getElementById('connDot');
-            const txt = document.getElementById('connText');
-            if(snap.val()) { 
-                dot.className='dot online'; 
-                txt.textContent='Online'; 
-            } else { 
-                dot.className='dot offline'; 
-                txt.textContent='Disconnected'; 
-            }
+            const dot = document.getElementById('connDot'), txt = document.getElementById('connText');
+            if(snap.val()) { dot.className='dot online'; txt.textContent='Live'; }
+            else { dot.className='dot offline'; txt.textContent='Disconnected'; }
         });
 
-        // Initialize the game
         initBoard();
     </script>
 </body>

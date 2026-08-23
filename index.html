@@ -17,7 +17,7 @@
             --text-dim: #94a3b8;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
         body {
             background: var(--bg-dark);
@@ -27,113 +27,126 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            overflow-x: hidden;
         }
-
-        .container { max-width: 1100px; width: 100%; }
-
-        header { text-align: center; margin-bottom: 20px; }
-        h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; letter-spacing: 2px; }
 
         /* --- SETTINGS MODAL --- */
         #settingsOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 3000;
+            background: rgba(0,0,0,0.9); z-index: 3000;
             display: none; justify-content: center; align-items: center;
         }
         .settings-card {
             background: var(--bg-card); padding: 30px; border-radius: 20px;
             width: 90%; max-width: 400px; border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 219, 222, 0.2);
         }
         .setting-group { margin-bottom: 20px; }
         .setting-group label { display: block; margin-bottom: 10px; font-weight: bold; color: var(--primary); }
         .setting-group select { 
-            width: 100%; padding: 10px; border-radius: 8px; background: #0f172a; 
-            color: white; border: 1px solid #334155; outline: none;
+            width: 100%; padding: 12px; border-radius: 8px; background: #0f172a; 
+            color: white; border: 1px solid #334155; outline: none; font-size: 1rem;
         }
 
-        /* --- STATS BAR --- */
+        /* --- STATS & ROOM INFO --- */
+        .container { max-width: 1000px; width: 100%; }
         .stats-bar {
-            background: var(--bg-card);
-            padding: 12px 20px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: var(--bg-card); padding: 15px 20px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);
         }
         .status-pill { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
         .online { background: #10b981; box-shadow: 0 0 10px #10b981; }
         .offline { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
-        .room-info { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; }
+        .room-info { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px 15px; border-radius: 8px; font-family: monospace; }
 
-        /* --- BOARD --- */
+        /* --- LAYOUT --- */
+        .main-layout { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+        @media (max-width: 900px) { .main-layout { grid-template-columns: 1fr; } }
+
+        /* --- GAME BOARD --- */
         .board {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;
-            max-width: 380px; margin: 10px auto;
+            max-width: 380px; margin: 0 auto;
         }
         .cell {
             aspect-ratio: 1; background: var(--bg-card); border-radius: 10px;
             display: flex; justify-content: center; align-items: center;
-            font-size: 3.2rem; font-weight: 800; cursor: pointer; transition: 0.2s;
-            height: 95px;
+            font-size: 3.5rem; font-weight: 800; cursor: pointer; transition: 0.2s;
+            height: 100px;
         }
         .cell:hover { background: #334155; transform: translateY(-3px); }
-        .cell.x { color: var(--primary); }
-        .cell.o { color: var(--secondary); }
+        .cell.x { color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        .cell.o { color: var(--secondary); text-shadow: 0 0 15px var(--secondary); }
 
-        .game-msg { text-align: center; margin: 15px 0; font-size: 1.2rem; font-weight: 700; min-height: 30px; }
+        .game-msg { text-align: center; margin: 20px 0; font-size: 1.3rem; font-weight: 700; min-height: 35px; }
 
-        /* --- UI ELEMENTS --- */
-        .controls { display: flex; flex-direction: column; gap: 10px; max-width: 400px; margin: 0 auto; }
-        .btn { padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        /* --- CONTROLS --- */
+        .controls { display: flex; flex-direction: column; gap: 10px; max-width: 380px; margin: 0 auto; }
+        .btn { padding: 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; font-size: 1rem; }
         .btn-main { background: var(--primary); color: #000; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-danger { background: #ef4444; color: white; }
+        .btn:hover { opacity: 0.9; transform: scale(1.02); }
 
-        .card { background: var(--bg-card); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
-        .player-row { display: flex; justify-content: space-between; padding: 12px; margin-top: 5px; border-radius: 8px; background: rgba(0,0,0,0.2); border: 2px solid transparent; }
-        .player-row.turn { border-color: var(--primary); background: rgba(0, 219, 222, 0.15); }
-        
-        .score-badge { background: #000; padding: 2px 10px; border-radius: 20px; color: var(--primary); font-weight: bold; }
+        /* --- SCOREBOARD --- */
+        .card { background: var(--bg-card); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .player-row { display: flex; justify-content: space-between; padding: 15px; margin-top: 10px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 2px solid transparent; }
+        .player-row.turn { border-color: var(--primary); background: rgba(0, 219, 222, 0.1); }
+        .score-badge { background: #000; padding: 4px 12px; border-radius: 20px; color: var(--primary); font-weight: 800; font-size: 1.1rem; }
 
-        /* --- CHAT --- */
+        /* --- IMPROVED CHAT INTERFACE --- */
         #chat-trigger {
-            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%;
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none; color: white; font-size: 1.4rem; cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4); z-index: 999; display: none;
+            border: none; color: white; font-size: 1.6rem; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 999; display: none;
             align-items: center; justify-content: center;
         }
         .badge {
-            position: absolute; top: -5px; right: -5px; background: #ff4757;
+            position: absolute; top: 0; right: 0; background: #ff4757;
             width: 24px; height: 24px; border-radius: 50%; font-size: 0.75rem;
-            display: none; align-items: center; justify-content: center; border: 2px solid var(--bg-dark); font-weight: bold;
+            display: none; align-items: center; justify-content: center; border: 2px solid var(--bg-dark);
         }
         #chat-box {
-            position: fixed; width: 350px; height: 450px; background: var(--bg-card);
-            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
-            display: none; flex-direction: column; z-index: 1000; bottom: 100px; right: 30px;
+            position: fixed; width: 380px; height: 500px; background: var(--bg-card);
+            border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            display: none; flex-direction: column; z-index: 1000; bottom: 110px; right: 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.7); overflow: hidden;
         }
-        .chat-msgs { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 0.9rem; word-wrap: break-word; }
-        .msg-me { align-self: flex-end; background: var(--primary); color: #000; }
-        .msg-them { align-self: flex-start; background: #334155; color: #fff; }
-        .ticks { font-size: 0.7rem; margin-left: 5px; }
-        .ticks.seen { color: #2563eb; }
+        .chat-header { padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
+        .chat-msgs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #161e2d; }
+        
+        .msg { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.95rem; line-height: 1.4; position: relative; }
+        .msg-me { align-self: flex-end; background: var(--primary); color: #000; border-bottom-right-radius: 2px; }
+        .msg-them { align-self: flex-start; background: #334155; color: #fff; border-bottom-left-radius: 2px; }
+        
+        /* Message Input Area */
+        .chat-input-area { 
+            padding: 15px; background: var(--bg-card); border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .chat-input-area input {
+            flex: 1; background: #0f172a; border: 1px solid #334155; padding: 12px 15px;
+            border-radius: 25px; color: white; outline: none; font-size: 0.95rem;
+        }
+        .chat-input-area input:focus { border-color: var(--primary); }
+        #chatSend {
+            background: var(--primary); border: none; width: 45px; height: 45px;
+            border-radius: 50%; color: #000; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+        }
+        #chatSend:hover { transform: scale(1.1); }
 
         #toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: #f59e0b; color: #000; padding: 10px 20px; border-radius: 30px;
-            font-weight: 800; display: none; z-index: 4000;
+            background: var(--primary); color: #000; padding: 12px 25px; border-radius: 30px;
+            font-weight: 800; display: none; z-index: 4000; box-shadow: 0 5px 20px rgba(0,0,0,0.4);
         }
 
-        @media (max-width: 900px) {
-            .main-layout { display: flex; flex-direction: column; }
-            #chat-box { width: 95%; right: 2.5%; bottom: 90px; }
+        @media (max-width: 600px) {
+            #chat-box { width: 95%; right: 2.5%; bottom: 100px; height: 70vh; }
         }
     </style>
 </head>
@@ -141,29 +154,30 @@
 
     <div id="settingsOverlay">
         <div class="settings-card">
-            <h2 style="margin-bottom:20px; text-align:center;">Match Settings</h2>
+            <h2 style="margin-bottom:20px; text-align:center;">New Match Setup</h2>
             <div class="setting-group">
-                <label>First Turn Logic</label>
+                <label>First Player Selection</label>
                 <select id="setTurnMode">
                     <option value="random">Randomize Every Round</option>
                     <option value="winner">Winner of Last Round Starts</option>
+                    <option value="creator">Creator (X) Always Starts</option>
                 </select>
             </div>
             <div class="setting-group">
-                <label>Match Mode</label>
+                <label>Match Type</label>
                 <select id="setMatchMode">
                     <option value="single">Single Match</option>
                     <option value="bestof3">Best of 3 (First to 2 wins)</option>
                 </select>
             </div>
-            <button class="btn btn-main" id="confirmSettings" style="width:100%">Start Game</button>
+            <button class="btn btn-main" id="confirmSettings" style="width:100%">Create Room</button>
         </div>
     </div>
 
-    <div id="toast">New Message Received</div>
+    <div id="toast">New Message Received!</div>
 
     <div class="container">
-        <header>
+        <header style="margin-bottom: 30px;">
             <h1>TIC TAC TOE <span style="color:var(--primary)">PRO</span></h1>
         </header>
 
@@ -173,26 +187,26 @@
                 <span id="connText">Connecting...</span>
             </div>
             <div class="room-info" id="roomDisplay" style="display: none;">
-                <span id="roomIdVal">ROOM ID</span>
-                <i class="fas fa-copy" style="cursor:pointer; color:var(--primary)" id="copyId"></i>
+                <span id="roomIdVal" style="color:var(--primary); font-weight:bold;">ROOM ID</span>
+                <i class="fas fa-copy" style="cursor:pointer;" id="copyId"></i>
             </div>
         </div>
 
         <div class="main-layout">
             <div class="game-section">
                 <div class="board" id="board"></div>
-                <div class="game-msg" id="gameMsg">Create a room to start</div>
+                <div class="game-msg" id="gameMsg">Setting up game...</div>
                 <div class="controls">
                     <button class="btn btn-main" id="btnCreate"><i class="fas fa-plus"></i> Create New Game</button>
-                    <button class="btn btn-outline" id="btnJoin"><i class="fas fa-sign-in-alt"></i> Join via ID</button>
-                    <button class="btn btn-danger" id="btnLeave" style="display:none"><i class="fas fa-door-open"></i> Leave Game</button>
-                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> Force Reset Board</button>
+                    <button class="btn btn-outline" id="btnJoin"><i class="fas fa-sign-in-alt"></i> Join Room</button>
+                    <button class="btn btn-danger" id="btnLeave" style="display:none"><i class="fas fa-sign-out-alt"></i> Leave Room</button>
+                    <button class="btn btn-outline" id="btnReset" style="display:none"><i class="fas fa-sync"></i> Manual Reset</button>
                 </div>
             </div>
 
             <div class="info-section">
                 <div class="card">
-                    <h3 style="margin-bottom:15px; font-size:1rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Scoreboard</h3>
+                    <h3 style="font-size:0.9rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;">Scoreboard</h3>
                     <div id="pXBox" class="player-row">
                         <span><i class="fas fa-times-circle" style="color:var(--primary)"></i> Player X</span>
                         <span class="score-badge" id="scoreX">0</span>
@@ -201,27 +215,33 @@
                         <span><i class="fas fa-circle-notch" style="color:var(--secondary)"></i> Player O</span>
                         <span class="score-badge" id="scoreO">0</span>
                     </div>
-                    <div style="margin-top:10px; text-align:center; font-size:0.8rem; color:var(--text-dim)" id="modeDisplay"></div>
+                    <p id="modeText" style="text-align:center; margin-top:15px; font-size:0.8rem; color:var(--text-dim);"></p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Chat Trigger -->
     <button id="chat-trigger">
-        <i class="fas fa-comments"></i>
+        <i class="fas fa-comment-dots"></i>
         <div class="badge" id="chatBadge">0</div>
     </button>
 
+    <!-- Chat Box -->
     <div id="chat-box">
+        <div class="chat-header">
+            <span style="font-weight:bold;"><i class="fas fa-circle" style="color:#10b981; font-size:8px;"></i> Room Chat</span>
+            <i class="fas fa-times" id="chatClose" style="cursor:pointer;"></i>
+        </div>
         <div class="chat-msgs" id="chatMsgs"></div>
-        <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Message...">
-            <button id="chatSend" style="background:none; border:none; color:var(--primary); cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Type a message...">
+            <button id="chatSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <script>
-        // --- FIREBASE INITIALIZATION ---
+        // --- FIREBASE SETUP ---
         const firebaseConfig = {
             apiKey: "AIzaSyBql4jB-mmcC3iYPQElUMgb1I3CaNLAz3Y",
             authDomain: "multiplayer-b6c33.firebaseapp.com",
@@ -234,7 +254,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- STATE ---
+        // --- APP STATE ---
         let gameId = null, playerSymbol = null, isMyTurn = false;
         let isChatOpen = false, unreadCount = 0, lastProcessedTime = Date.now(), oppLastRead = 0;
         let processedMsgIds = new Set();
@@ -242,7 +262,6 @@
         const boardEl = document.getElementById('board'), gameMsg = document.getElementById('gameMsg');
         const chatMsgs = document.getElementById('chatMsgs'), chatInput = document.getElementById('chatInput');
 
-        // --- GAME ACTIONS ---
         function initBoard() {
             boardEl.innerHTML = '';
             for(let i=0; i<9; i++) {
@@ -253,23 +272,20 @@
             }
         }
 
-        document.getElementById('btnCreate').onclick = () => {
-            document.getElementById('settingsOverlay').style.display = 'flex';
-        };
+        // --- GAME LOGIC ---
+        document.getElementById('btnCreate').onclick = () => document.getElementById('settingsOverlay').style.display = 'flex';
 
         document.getElementById('confirmSettings').onclick = async () => {
             const id = Math.random().toString(36).substring(2, 8).toUpperCase();
             const config = {
                 turnMode: document.getElementById('setTurnMode').value,
-                isBestOf3: document.getElementById('setMatchMode').value === 'bestof3'
+                matchMode: document.getElementById('setMatchMode').value
             };
-            
             await db.ref('games/' + id).set({
                 board: Array(9).fill(''), turn: 'X', status: 'waiting',
                 pX: true, pO: false, scores: {X: 0, O: 0},
                 config: config, lastReadX: Date.now(), lastReadO: 0
             });
-            
             document.getElementById('settingsOverlay').style.display = 'none';
             joinAs(id, 'X');
         };
@@ -278,10 +294,19 @@
             const id = prompt("Enter Room ID:")?.toUpperCase();
             if(!id) return;
             const snap = await db.ref('games/' + id).once('value');
-            if(!snap.exists()) return alert("Room not found!");
-            if(snap.val().pO) return alert("Room full!");
+            if(!snap.exists()) return alert("Invalid Room ID!");
+            const data = snap.val();
+            if(data.pO) return alert("Room is full!");
 
-            await db.ref('games/' + id).update({ pO: true, status: 'playing' });
+            // Random turn selection on start
+            let startTurn = data.turn;
+            if(data.config.turnMode === 'random') startTurn = Math.random() < 0.5 ? 'X' : 'O';
+
+            await db.ref('games/' + id).update({ 
+                pO: true, 
+                status: 'playing',
+                turn: startTurn
+            });
             joinAs(id, 'O');
         }
 
@@ -296,7 +321,6 @@
             const oppTag = symbol === 'X' ? 'O' : 'X';
             db.ref(`games/${id}/lastRead${oppTag}`).on('value', snap => {
                 oppLastRead = snap.val() || 0;
-                refreshTicks();
             });
 
             document.getElementById('roomDisplay').style.display = 'flex';
@@ -314,35 +338,32 @@
             const data = snap.val();
             if(!data) return;
 
-            // Sync Board
-            const cells = document.querySelectorAll('.cell');
+            // Update UI
             data.board.forEach((v, i) => {
-                cells[i].textContent = v;
-                cells[i].className = 'cell ' + (v ? v.toLowerCase() : '');
+                const cell = boardEl.children[i];
+                cell.textContent = v;
+                cell.className = 'cell ' + (v ? v.toLowerCase() : '');
             });
 
-            // Sync Scores & UI
             document.getElementById('scoreX').textContent = data.scores.X;
             document.getElementById('scoreO').textContent = data.scores.O;
-            document.getElementById('modeDisplay').textContent = data.config.isBestOf3 ? "Mode: Best of 3" : "Mode: Single Match";
             document.getElementById('pXBox').classList.toggle('turn', data.turn === 'X');
             document.getElementById('pOBox').classList.toggle('turn', data.turn === 'O');
+            document.getElementById('modeText').textContent = data.config.matchMode === 'bestof3' ? "Best of 3 Match" : "Single Match Mode";
 
-            // Turn Logic - The Fix
             isMyTurn = (data.turn === playerSymbol && data.status === 'playing');
 
             if(data.status === 'win') {
-                gameMsg.textContent = `Player ${data.winner} Wins Round!`;
+                gameMsg.textContent = `Player ${data.winner} wins round!`;
                 gameMsg.style.color = "var(--primary)";
             } else if(data.status === 'match_over') {
-                gameMsg.textContent = `MATCH OVER: ${data.winner} WINS! 🎉`;
+                gameMsg.textContent = `MATCH OVER! ${data.winner} is the Champion! 🏆`;
                 gameMsg.style.color = "var(--secondary)";
             } else if(data.status === 'draw') {
-                gameMsg.textContent = "It's a Draw!";
+                gameMsg.textContent = "It's a Draw! 🤝";
             } else if(data.status === 'waiting') {
-                gameMsg.textContent = "Waiting for Opponent...";
+                gameMsg.textContent = "Waiting for Player O...";
             } else {
-                // This ensures "Opponent's Turn" is always visible
                 gameMsg.textContent = isMyTurn ? "Your Turn" : "Opponent's Turn";
                 gameMsg.style.color = "var(--text-main)";
             }
@@ -352,46 +373,43 @@
             if(!isMyTurn) return;
             const snap = await db.ref('games/' + gameId).once('value');
             const data = snap.val();
-            const b = [...data.board];
-            if(b[i] || data.status !== 'playing') return;
+            if(data.board[i] || data.status !== 'playing') return;
 
-            b[i] = playerSymbol;
-            const win = checkWin(b);
-            const draw = !win && b.every(x => x !== '');
+            const newBoard = [...data.board];
+            newBoard[i] = playerSymbol;
             
-            let updates = { board: b };
+            const win = checkWin(newBoard);
+            const draw = !win && newBoard.every(x => x !== '');
+
+            let updates = { board: newBoard };
 
             if(win || draw) {
                 let newScores = {...data.scores};
                 if(win) newScores[playerSymbol]++;
                 
-                const isMatchOver = data.config.isBestOf3 && (newScores.X >= 2 || newScores.O >= 2);
+                const isMatchOver = data.config.matchMode === 'bestof3' && (newScores.X >= 2 || newScores.O >= 2);
                 
                 updates.status = isMatchOver ? 'match_over' : (win ? 'win' : 'draw');
                 updates.winner = win ? playerSymbol : null;
                 updates.scores = newScores;
 
-                // Handle round reset after 3 seconds
                 if(!isMatchOver) {
-                    setTimeout(() => resetBoard(win ? playerSymbol : null), 3000);
+                    setTimeout(() => resetRound(win ? playerSymbol : null), 2500);
                 }
             } else {
                 updates.turn = playerSymbol === 'X' ? 'O' : 'X';
             }
-            
             db.ref('games/' + gameId).update(updates);
         }
 
-        async function resetBoard(lastWinner) {
+        async function resetRound(lastWinner) {
             const snap = await db.ref('games/' + gameId).once('value');
+            if(!snap.exists()) return;
             const data = snap.val();
-            let nextTurn = 'X';
             
-            if(data.config.turnMode === 'random') {
-                nextTurn = Math.random() < 0.5 ? 'X' : 'O';
-            } else if(data.config.turnMode === 'winner' && lastWinner) {
-                nextTurn = lastWinner;
-            }
+            let nextTurn = 'X';
+            if(data.config.turnMode === 'random') nextTurn = Math.random() < 0.5 ? 'X' : 'O';
+            else if(data.config.turnMode === 'winner' && lastWinner) nextTurn = lastWinner;
 
             db.ref('games/' + gameId).update({
                 board: Array(9).fill(''),
@@ -417,8 +435,9 @@
                 const isSeen = oppLastRead >= m.timestamp;
                 const div = document.createElement('div');
                 div.className = `msg ${isMe ? 'msg-me' : 'msg-them'}`;
-                div.innerHTML = `${m.text} ${isMe ? `<span class="ticks ${isSeen?'seen':''}"><i class="fas fa-check${isSeen?'-double':''}"></i></span>` : ''}`;
+                div.innerHTML = `${m.text} ${isMe ? `<i class="fas fa-check${isSeen?'-double':''}" style="font-size:0.7rem; margin-left:5px; opacity:0.6;"></i>` : ''}`;
                 chatMsgs.appendChild(div);
+                
                 if(!isMe && !isChatOpen && !processedMsgIds.has(k) && m.timestamp > lastProcessedTime) {
                     unreadCount++; processedMsgIds.add(k);
                     document.getElementById('toast').style.display='block';
@@ -429,16 +448,18 @@
             chatMsgs.scrollTop = chatMsgs.scrollHeight;
         }
 
-        function refreshTicks() {
-            // Handled inside syncChat for simplicity in this version
-        }
-
-        document.getElementById('chatSend').onclick = () => {
+        function sendMessage() {
             const text = chatInput.value.trim();
             if(!text || !gameId) return;
-            db.ref('chats/' + gameId).push({ sender: playerSymbol, text, timestamp: firebase.database.ServerValue.TIMESTAMP });
+            db.ref('chats/' + gameId).push({
+                sender: playerSymbol, text, timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
             chatInput.value = '';
-        };
+            chatInput.focus();
+        }
+
+        document.getElementById('chatSend').onclick = sendMessage;
+        chatInput.onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
 
         // --- UI UTILS ---
         function updateButtons(active) {
@@ -450,17 +471,24 @@
 
         document.getElementById('btnJoin').onclick = joinGame;
         document.getElementById('btnLeave').onclick = () => location.reload();
-        document.getElementById('btnReset').onclick = () => resetBoard();
-        document.getElementById('copyId').onclick = () => { navigator.clipboard.writeText(gameId); alert("ID Copied!"); };
+        document.getElementById('btnReset').onclick = () => resetRound();
+        document.getElementById('copyId').onclick = () => { navigator.clipboard.writeText(gameId); alert("Room ID Copied!"); };
+        
         document.getElementById('chat-trigger').onclick = () => {
-            isChatOpen = !isChatOpen;
-            document.getElementById('chat-box').style.display = isChatOpen ? 'flex' : 'none';
-            if(isChatOpen) { unreadCount = 0; chatBadge.style.display='none'; db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now()); }
+            isChatOpen = true; unreadCount = 0; chatBadge.style.display='none';
+            document.getElementById('chat-box').style.display = 'flex';
+            chatMsgs.scrollTop = chatMsgs.scrollHeight;
+            if(gameId) db.ref(`games/${gameId}/lastRead${playerSymbol}`).set(Date.now());
+        };
+        
+        document.getElementById('chatClose').onclick = () => {
+            isChatOpen = false;
+            document.getElementById('chat-box').style.display = 'none';
         };
 
         db.ref('.info/connected').on('value', snap => {
             document.getElementById('connDot').className = snap.val() ? 'dot online' : 'dot offline';
-            document.getElementById('connText').textContent = snap.val() ? 'Live' : 'Disconnected';
+            document.getElementById('connText').textContent = snap.val() ? 'Live' : 'Offline';
         });
 
         initBoard();
